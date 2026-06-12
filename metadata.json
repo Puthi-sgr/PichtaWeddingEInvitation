@@ -1,0 +1,8 @@
+{
+  "name": "Forever & Always",
+  "description": "An elegant, mobile-friendly wedding invitation website featuring immersive GSAP parallax scroll animations. Share your special day with a modern, interactive experience.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
