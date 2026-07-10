@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run *)",
+      "Bash(npm install *)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" https://puthi-sgr.github.io/PichtaWeddingEInvitation/)",
+      "Bash(curl -s https://puthi-sgr.github.io/PichtaWeddingEInvitation/)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" https://puthi-sgr.github.io/PichtaWeddingEInvitation/invite/chantha-family/)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" https://puthi-sgr.github.io/PichtaWeddingEInvitation/assets/index-BernaTtb.js)",
+      "PowerShell(npm install @tsparticles/react @tsparticles/slim @tsparticles/engine --ignore-scripts 2>&1)",
+      "Bash(xargs -I{} sh -c 'echo ==={}===; cat {}')"
+    ]
+  }
+}

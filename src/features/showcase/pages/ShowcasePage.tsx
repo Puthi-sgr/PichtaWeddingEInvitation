@@ -14,7 +14,12 @@ export default function ShowcasePage() {
 
   return (
     <div ref={containerRef} className="w-full overflow-x-hidden bg-stone-50 font-sans text-stone-800">
-      <Navbar links={[{ label: "Back to Invite", to: "/" }]} />
+      <Navbar
+        links={[
+          { label: "Back to Invite", to: "/" },
+          { label: "Particles", to: "/particles-lab" },
+        ]}
+      />
       <HeroStagger titleText={titleText} />
       <VerticalParallax />
       <SpinBox />

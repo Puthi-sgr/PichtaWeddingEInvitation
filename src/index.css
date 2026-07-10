@@ -1,9 +1,9 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Lato:ital,wght@0,300;0,400;0,700;1,300;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Moul&display=swap');
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "Lato", ui-sans-serif, system-ui, sans-serif;
-  --font-serif: "Playfair Display", ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+  --font-sans: "Moul", "Noto Sans Khmer", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Moul", "Noto Serif Khmer", ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
   
   --color-stone-50: #fafaf9;
   --color-stone-100: #f5f5f4;
@@ -20,7 +20,236 @@
   --color-gold-500: #b59247;
 }
 
+:root {
+  --text-gold-highlight: #fffef0;
+  --text-gold-bright: #fff09d;
+  --text-gold-mid: #ffd85a;
+  --text-gold-deep: #c99a1c;
+  --text-gold-shadow: rgba(63, 43, 5, 0.42);
+  --text-gold-glow: rgba(255, 238, 152, 0.30);
+}
+
 body {
   background-color: var(--color-stone-50);
   color: var(--color-stone-800);
+  font-family: var(--font-sans);
+}
+
+/* All scroll modes share one light theme now that the scrub video sits behind
+   a dark veil — dark text would be unreadable against it. */
+.wedding-copy-theme,
+.wedding-copy-theme[data-scroll-visual-mode="forwardScrub"],
+.wedding-copy-theme[data-scroll-visual-mode="initialCover"],
+.wedding-copy-theme[data-scroll-visual-mode="reverseCover"],
+.wedding-copy-theme[data-scroll-visual-mode="posterFallback"] {
+  --wedding-text-primary: rgba(255, 255, 255, 0.94);
+  --wedding-text-secondary: rgba(255, 255, 255, 0.8);
+  --wedding-text-kicker: rgba(247, 224, 167, 0.96);
+  --wedding-text-accent: rgb(201, 167, 93);
+  --wedding-scroll-line: rgba(255, 255, 255, 0.52);
+}
+
+.wedding-text-primary {
+  color: var(--wedding-text-primary);
+  transition: color 180ms ease;
+}
+
+.wedding-text-secondary {
+  color: var(--wedding-text-secondary);
+  transition: color 180ms ease;
+}
+
+.wedding-text-kicker {
+  color: var(--wedding-text-kicker);
+  transition: color 180ms ease;
+}
+
+.wedding-text-accent {
+  color: var(--wedding-text-accent);
+  transition: color 180ms ease;
+}
+
+.gold-text,
+.wedding-text-kicker,
+.wedding-text-accent,
+.text-gold-400,
+.text-gold-500,
+.text-yellow-300,
+.text-yellow-400,
+.text-yellow-500,
+.gold-text-soft,
+.gold-text-bright,
+.gold-text-deep {
+  color: transparent;
+  background-image: linear-gradient(
+    180deg,
+    var(--text-gold-highlight) 0%,
+    var(--text-gold-bright) 30%,
+    var(--text-gold-mid) 54%,
+    var(--text-gold-deep) 72%,
+    var(--text-gold-bright) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  text-shadow:
+    0 1px 0 var(--text-gold-shadow),
+    0 0 10px var(--text-gold-glow);
+}
+
+.gold-text-soft {
+  --text-gold-highlight: #fffff7;
+  --text-gold-bright: #fff4bc;
+  --text-gold-mid: #ffe184;
+  --text-gold-deep: #d7ad3a;
+  --text-gold-glow: rgba(255, 244, 188, 0.5);
+}
+
+.gold-text-bright {
+  --text-gold-highlight: #ffffff;
+  --text-gold-bright: #fff4ae;
+  --text-gold-mid: #ffdf63;
+  --text-gold-deep: #e1b12a;
+  --text-gold-glow: rgba(255, 232, 119, 0.64);
+}
+
+.gold-text-deep {
+  --text-gold-highlight: #fff9cf;
+  --text-gold-bright: #f9dc72;
+  --text-gold-mid: #e0b83a;
+  --text-gold-deep: #b18416;
+  --text-gold-glow: rgba(249, 220, 114, 0.42);
+}
+
+.prestige-ivory-text,
+.antique-cream-text,
+.pearl-emboss-text,
+.champagne-text,
+.ivory-gold-edge-text {
+  color: transparent;
+  background-image: linear-gradient(
+    180deg,
+    var(--prestige-text-highlight) 0%,
+    var(--prestige-text-face) 34%,
+    var(--prestige-text-mid) 62%,
+    var(--prestige-text-low) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  paint-order: stroke fill;
+  -webkit-text-stroke: var(--prestige-text-stroke-width, 0.18px) var(--prestige-text-stroke);
+  text-shadow:
+    0 -1px 0 var(--prestige-text-top-light),
+    0 1px 0 var(--prestige-text-bottom-edge),
+    0 3px 0 var(--prestige-text-drop-edge),
+    0 7px 12px var(--prestige-text-cast-shadow),
+    0 0 14px var(--prestige-text-glow);
+}
+
+.prestige-ivory-text {
+  --prestige-text-highlight: #fffef4;
+  --prestige-text-face: #fff6da;
+  --prestige-text-mid: #f2dfad;
+  --prestige-text-low: #d1ad57;
+  --prestige-text-stroke: rgba(219, 178, 74, 0.3);
+  --prestige-text-top-light: rgba(255, 255, 255, 0.62);
+  --prestige-text-bottom-edge: rgba(117, 84, 20, 0.46);
+  --prestige-text-drop-edge: rgba(64, 45, 10, 0.38);
+  --prestige-text-cast-shadow: rgba(0, 0, 0, 0.48);
+  --prestige-text-glow: rgba(255, 232, 167, 0.24);
+}
+
+.antique-cream-text {
+  --prestige-text-highlight: #fff9e8;
+  --prestige-text-face: #f1dfb6;
+  --prestige-text-mid: #d9bd75;
+  --prestige-text-low: #a97924;
+  --prestige-text-stroke: rgba(169, 121, 36, 0.4);
+  --prestige-text-top-light: rgba(255, 252, 235, 0.42);
+  --prestige-text-bottom-edge: rgba(92, 65, 17, 0.54);
+  --prestige-text-drop-edge: rgba(45, 32, 8, 0.42);
+  --prestige-text-cast-shadow: rgba(0, 0, 0, 0.5);
+  --prestige-text-glow: rgba(245, 220, 157, 0.2);
+}
+
+.pearl-emboss-text {
+  --prestige-text-highlight: #ffffff;
+  --prestige-text-face: #fff9ea;
+  --prestige-text-mid: #eadcae;
+  --prestige-text-low: #c8a955;
+  --prestige-text-stroke: rgba(228, 196, 106, 0.34);
+  --prestige-text-stroke-width: 0.12px;
+  --prestige-text-top-light: rgba(255, 255, 255, 0.76);
+  --prestige-text-bottom-edge: rgba(137, 108, 39, 0.48);
+  --prestige-text-drop-edge: rgba(76, 55, 15, 0.42);
+  --prestige-text-cast-shadow: rgba(0, 0, 0, 0.52);
+  --prestige-text-glow: rgba(255, 248, 226, 0.25);
+}
+
+.champagne-text {
+  --prestige-text-highlight: #fff4c6;
+  --prestige-text-face: #ead9a6;
+  --prestige-text-mid: #c9a760;
+  --prestige-text-low: #8f681e;
+  --prestige-text-stroke: rgba(193, 149, 47, 0.42);
+  --prestige-text-top-light: rgba(255, 244, 198, 0.36);
+  --prestige-text-bottom-edge: rgba(80, 56, 12, 0.58);
+  --prestige-text-drop-edge: rgba(42, 30, 7, 0.5);
+  --prestige-text-cast-shadow: rgba(0, 0, 0, 0.52);
+  --prestige-text-glow: rgba(234, 217, 166, 0.2);
+}
+
+.ivory-gold-edge-text {
+  --prestige-text-highlight: #ffffff;
+  --prestige-text-face: #fff8e7;
+  --prestige-text-mid: #f0d491;
+  --prestige-text-low: #c79a2a;
+  --prestige-text-stroke: rgba(225, 181, 62, 0.68);
+  --prestige-text-stroke-width: 0.42px;
+  --prestige-text-top-light: rgba(255, 255, 255, 0.62);
+  --prestige-text-bottom-edge: rgba(111, 82, 22, 0.58);
+  --prestige-text-drop-edge: rgba(52, 37, 9, 0.5);
+  --prestige-text-cast-shadow: rgba(0, 0, 0, 0.54);
+  --prestige-text-glow: rgba(236, 203, 111, 0.3);
+}
+
+.wedding-scroll-line {
+  background-color: var(--wedding-scroll-line);
+  transition: background-color 180ms ease;
+}
+
+/* PhotoMosaic tiles: rounded corners (radius driven by the --mosaic-radius
+   custom property the component sets) + a subtle tap/hover affordance. */
+.photo-mosaic-grid img {
+  border-radius: var(--mosaic-radius, 8px);
+  cursor: pointer;
+  transition: filter 200ms ease, transform 200ms ease;
+}
+
+.photo-mosaic-grid img:hover {
+  filter: brightness(1.06);
+}
+
+/* FramedGallery: rounded imgs + placeholder boxes for unfilled slots. The
+   --mosaic-radius custom property is set on the container by the component. */
+.framed-gallery img {
+  display: block;
+  border-radius: var(--mosaic-radius, 8px);
+  cursor: pointer;
+  transition: filter 200ms ease;
+}
+
+.framed-gallery img:hover {
+  filter: brightness(1.06);
+}
+
+.framed-gallery-placeholder {
+  display: flex;
+  height: 100%;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--mosaic-radius, 8px);
+  border: 1px dashed rgba(120, 113, 108, 0.3);
+  background: linear-gradient(135deg, rgba(201, 167, 93, 0.08), rgba(120, 113, 108, 0.12));
+  color: rgba(120, 113, 108, 0.55);
 }

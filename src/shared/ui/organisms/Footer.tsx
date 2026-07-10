@@ -1,6 +1,6 @@
-export function Footer({ text = "Emma & James &copy; 2026" }: { text?: string }) {
+export function Footer({ text = "រៀបចំឡើងដោយក្តីស្រលាញ់" }: { text?: string }) {
   return (
-    <footer className="py-12 bg-stone-900 text-center text-stone-500 font-sans text-sm tracking-widest uppercase">
+    <footer className="wedding-text-secondary py-12 text-center font-sans text-sm tracking-widest uppercase">
       <p dangerouslySetInnerHTML={{ __html: text }} />
     </footer>
   );

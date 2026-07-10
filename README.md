@@ -1,20 +1,19 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
-</div>
+# Pichta Wedding E-Invitation
 
-# Run and deploy your AI Studio app
-
-This contains everything you need to run your app locally.
-
-View your app in AI Studio: https://ai.studio/apps/57e02cf7-eb82-4eb3-96a6-3999a9a7569e
+An elegant wedding invitation built with React, Vite, Tailwind CSS, GSAP, and Cloudinary-ready image utilities.
 
 ## Run Locally
 
-**Prerequisites:**  Node.js
-
+Prerequisite: Node.js
 
 1. Install dependencies:
    `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
+2. Optional: copy `.env.example` to `.env.local` and set `VITE_CLOUDINARY_CLOUD_NAME` to enable Cloudinary fetch URLs.
+3. Start the dev server:
    `npm run dev`
+
+## Cloudinary Utilities
+
+Reusable Cloudinary helpers live in `src/shared/utils/cld`.
+
+Use `getCldFetchUrl` for remote image URLs and `getCldImage` or `getRegisteredCldImage` for Cloudinary public IDs.
