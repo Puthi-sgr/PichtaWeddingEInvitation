@@ -1,9 +1,11 @@
-@import url('https://fonts.googleapis.com/css2?family=Moul&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&family=Hanuman:wght@300;400;500&family=Moul&family=Parisienne&display=swap');
 @import "tailwindcss";
 
 @theme {
   --font-sans: "Moul", "Noto Sans Khmer", ui-sans-serif, system-ui, sans-serif;
   --font-serif: "Moul", "Noto Serif Khmer", ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+  --font-english: "Parisienne", cursive;
+  --font-english-sub: "Cormorant Garamond", ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
   
   --color-stone-50: #fafaf9;
   --color-stone-100: #f5f5f4;
@@ -27,12 +29,196 @@
   --text-gold-deep: #c99a1c;
   --text-gold-shadow: rgba(63, 43, 5, 0.42);
   --text-gold-glow: rgba(255, 238, 152, 0.30);
+  --crown-pearl: #fffdf2;
+  --crown-champagne: #ead7a1;
+  --crown-gold: #d4af37;
+  --crown-bronze: #805c17;
+  --crown-enamel: #173b2b;
+  --crown-shadow: rgba(9, 12, 9, 0.7);
 }
 
 body {
   background-color: var(--color-stone-50);
   color: var(--color-stone-800);
   font-family: var(--font-sans);
+}
+
+/* On wide screens the invite remains a portrait, phone-sized experience.
+   Its fixed media layers use the same width as the scrolling canvas, while
+   the reverse-cover artwork fills the otherwise unused desktop surround. */
+.wedding-desktop-side-scenery {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .wedding-experience-stage {
+    background: #10180f;
+  }
+
+  .wedding-desktop-side-scenery {
+    position: fixed;
+    z-index: 0;
+    inset: 0;
+    display: block;
+    overflow: hidden;
+    background: #10180f;
+  }
+
+  .wedding-desktop-side-scenery::after {
+    position: absolute;
+    inset: 0;
+    background: rgba(10, 20, 11, 0.2);
+    content: "";
+  }
+
+  .wedding-desktop-side-scenery img {
+    opacity: 0.72;
+  }
+
+  .wedding-mobile-canvas {
+    width: min(100%, 26.25rem);
+    min-height: 100svh;
+    box-shadow:
+      0 0 0 1px rgba(224, 184, 78, 0.36),
+      0 20px 54px rgba(0, 0, 0, 0.48);
+  }
+
+  .wedding-mobile-viewport {
+    right: auto;
+    left: 50%;
+    width: min(100vw, 26.25rem);
+    transform: translateX(-50%) translateZ(0);
+  }
+
+  /* A desktop viewport would otherwise activate Tailwind's sm:/md: utilities
+     inside this narrow canvas. Keep every invitation section at the values a
+     420px phone receives. */
+  .wedding-mobile-canvas .invitation-hero-section {
+    padding: 7rem 2.25rem;
+  }
+
+  .wedding-mobile-canvas .guest-name {
+    font-size: 2.25rem;
+  }
+
+  .wedding-mobile-canvas .hero-detail {
+    font-size: 1.875rem;
+  }
+
+  .wedding-mobile-canvas .lineage-section,
+  .wedding-mobile-canvas .venue-section,
+  .wedding-mobile-canvas .gallery-section {
+    padding: 7rem 1.25rem;
+  }
+
+  .wedding-mobile-canvas .lineage-badge {
+    width: 5rem;
+    height: 5rem;
+  }
+
+  .wedding-mobile-canvas .lineage-kicker {
+    font-size: 1.5rem;
+  }
+
+  .wedding-mobile-canvas .lineage-section > div > .grid {
+    gap: 0.75rem;
+    font-size: 0.875rem;
+    line-height: 1.75;
+  }
+
+  .wedding-mobile-canvas .lineage-copy {
+    font-size: 0.875rem;
+    line-height: 1.9;
+  }
+
+  .wedding-mobile-canvas .couple-names .initials-radiance {
+    width: 6rem;
+    height: 6rem;
+  }
+
+  .wedding-mobile-canvas .couple-names > div {
+    gap: 0.5rem;
+    font-size: 1.25rem;
+    line-height: 1.6;
+  }
+
+  .wedding-mobile-canvas .couple-names .wedding-text-accent {
+    font-size: 1rem;
+  }
+
+  .wedding-mobile-canvas .agenda-section {
+    padding: 6rem 1.25rem;
+  }
+
+  .wedding-mobile-canvas .agenda-kicker {
+    font-size: 1.125rem;
+  }
+
+  .wedding-mobile-canvas .agenda-heading {
+    font-size: 2.25rem;
+  }
+
+  .wedding-mobile-canvas .agenda-note {
+    font-size: 1rem;
+  }
+
+  .wedding-mobile-canvas .agenda-timeline {
+    margin-top: 3.5rem;
+  }
+
+  .wedding-mobile-canvas .agenda-item {
+    column-gap: 0.75rem;
+    padding-block: 1.25rem;
+  }
+
+  .wedding-mobile-canvas .agenda-icon-image {
+    width: 4rem;
+    height: 4rem;
+  }
+
+  .wedding-mobile-canvas .agenda-time {
+    font-size: 1.125rem;
+  }
+
+  .wedding-mobile-canvas .agenda-label {
+    font-size: 1rem;
+  }
+
+  .wedding-mobile-canvas .agenda-item .agenda-label + p {
+    font-size: 0.75rem;
+  }
+
+  .wedding-mobile-canvas .venue-kicker {
+    font-size: 1.5rem;
+  }
+
+  .wedding-mobile-canvas .venue-title,
+  .wedding-mobile-canvas .gallery-heading {
+    font-size: 2.25rem;
+  }
+
+  .wedding-mobile-canvas .venue-section .wedding-text-secondary,
+  .wedding-mobile-canvas .gallery-subtitle {
+    font-size: 1.5rem;
+  }
+
+  .wedding-mobile-canvas .venue-map-label,
+  .wedding-mobile-canvas .gallery-more,
+  .wedding-mobile-canvas .footer-credit {
+    font-size: 1.25rem;
+  }
+
+  .wedding-mobile-canvas .footer-section {
+    padding: 6rem 1.25rem;
+  }
+
+  .wedding-mobile-canvas .footer-heading {
+    font-size: 1.875rem;
+  }
+
+  .wedding-mobile-canvas .footer-section .wedding-text-secondary {
+    font-size: 1.25rem;
+  }
 }
 
 /* All scroll modes share one light theme now that the scrub video sits behind
@@ -67,6 +253,15 @@ body {
 .wedding-text-accent {
   color: var(--wedding-text-accent);
   transition: color 180ms ease;
+}
+
+/* Skinny counterpoint to the heavy Moul display face — used for the family
+   lineage details and formal copy lines so the whole section doesn't read as
+   one uniform weight of bold. */
+.wedding-text-skinny {
+  font-family: "Hanuman", serif;
+  font-weight: 300;
+  letter-spacing: 0.01em;
 }
 
 .gold-text,
@@ -186,16 +381,16 @@ body {
 }
 
 .champagne-text {
-  --prestige-text-highlight: #fff4c6;
-  --prestige-text-face: #ead9a6;
-  --prestige-text-mid: #c9a760;
-  --prestige-text-low: #8f681e;
-  --prestige-text-stroke: rgba(193, 149, 47, 0.42);
-  --prestige-text-top-light: rgba(255, 244, 198, 0.36);
-  --prestige-text-bottom-edge: rgba(80, 56, 12, 0.58);
-  --prestige-text-drop-edge: rgba(42, 30, 7, 0.5);
-  --prestige-text-cast-shadow: rgba(0, 0, 0, 0.52);
-  --prestige-text-glow: rgba(234, 217, 166, 0.2);
+  --prestige-text-highlight: #fff9d6;
+  --prestige-text-face: #f6e6ac;
+  --prestige-text-mid: #e0bd6e;
+  --prestige-text-low: #b1852c;
+  --prestige-text-stroke: rgba(214, 168, 60, 0.42);
+  --prestige-text-top-light: rgba(255, 248, 210, 0.4);
+  --prestige-text-bottom-edge: rgba(80, 56, 12, 0.52);
+  --prestige-text-drop-edge: rgba(42, 30, 7, 0.46);
+  --prestige-text-cast-shadow: rgba(0, 0, 0, 0.5);
+  --prestige-text-glow: rgba(247, 227, 160, 0.28);
 }
 
 .ivory-gold-edge-text {
@@ -212,9 +407,357 @@ body {
   --prestige-text-glow: rgba(236, 203, 111, 0.3);
 }
 
+/* Royal Khmer Crown Inlay: the display name is built as a jewelled object.
+   The semantic text stays intact so Khmer marks and conjuncts shape correctly;
+   the aria-hidden copies provide the enamel relief, gold rim, and single glint. */
+.crown-hero-lockup {
+  position: relative;
+  isolation: isolate;
+}
+
+.crown-hero-lockup > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Local contrast support for a single text run; avoids darkening the whole hero. */
+.text-radial-backdrop {
+  position: relative;
+  display: inline-block;
+  isolation: isolate;
+}
+
+.text-radial-backdrop::before {
+  position: absolute;
+  z-index: 0;
+  inset: -0.34em -0.58em;
+  border-radius: 50%;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(0, 0, 0, 0.34) 0%,
+    rgba(0, 0, 0, 0.16) 52%,
+    transparent 78%
+  );
+  content: "";
+  pointer-events: none;
+}
+
+.text-radial-backdrop > * {
+  position: relative;
+  z-index: 1;
+}
+
+.text-radial-backdrop--block {
+  display: block;
+  width: fit-content;
+  max-width: 100%;
+  margin-inline: auto;
+}
+
+.text-radial-backdrop--start {
+  display: block;
+  width: fit-content;
+  max-width: 100%;
+}
+
+.crown-gold-leaf-text {
+  color: #f1d98f;
+  background-image: none;
+  background-blend-mode: normal;
+  -webkit-text-stroke: clamp(0.25px, 0.012em, 0.5px) rgba(111, 74, 11, 0.74);
+  text-shadow:
+    0 -0.02em 0 rgba(255, 255, 255, 0.82),
+    0 0.045em 0 rgba(102, 67, 9, 0.82),
+    0 0 0.14em rgba(255, 222, 124, 0.12);
+}
+
+.crown-invitation-line {
+  color: var(--crown-champagne);
+  background-image: none;
+  background-blend-mode: normal;
+  text-shadow:
+    0 -0.018em 0 rgba(255, 255, 255, 0.48),
+    0 0.035em 0 rgba(103, 73, 16, 0.62),
+    0 0.1em 0 rgba(56, 39, 8, 0.5),
+    0 0 0.28em rgba(241, 214, 151, 0.2);
+}
+
+.guest-crown-reveal {
+  transform-origin: 50% 62%;
+  letter-spacing: 0;
+  text-wrap: balance;
+  word-break: normal;
+}
+
+.royal-crown-inlay-underlay,
+.royal-crown-inlay-gold,
+.royal-crown-inlay-text,
+.royal-crown-inlay-glint {
+  font: inherit;
+  line-height: inherit;
+  letter-spacing: 0;
+  text-align: inherit;
+  white-space: pre-wrap;
+}
+
+.royal-crown-inlay-underlay,
+.royal-crown-inlay-gold {
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  paint-order: stroke fill;
+}
+
+.royal-crown-inlay-underlay {
+  z-index: 0;
+  -webkit-text-stroke: clamp(2.4px, 0.078em, 4.4px) rgba(13, 47, 33, 0.96);
+  text-shadow:
+    0 0.035em 0 #9a6b17,
+    0 0.07em 0 var(--crown-bronze),
+    0 0.11em 0 #422d0b,
+    0 0.2em 0.31em var(--crown-shadow),
+    0 0 0.32em rgba(227, 181, 62, 0.18);
+}
+
+.royal-crown-inlay-gold {
+  z-index: 1;
+  -webkit-text-stroke: clamp(1.55px, 0.052em, 3px) var(--crown-gold);
+  text-shadow:
+    0 -0.02em 0 #ffe99e,
+    0 0.022em 0 #80520c;
+}
+
+.royal-crown-inlay-text {
+  z-index: 2;
+  color: #f7e8bf;
+  paint-order: stroke fill;
+  -webkit-text-fill-color: #f7e8bf;
+  -webkit-text-stroke: clamp(0.45px, 0.016em, 0.85px) var(--crown-enamel);
+  text-shadow:
+    0 -0.02em 0 rgba(255, 255, 255, 0.92),
+    0 0.025em 0 rgba(123, 83, 13, 0.78);
+}
+
+.royal-crown-inlay-glint {
+  display: none;
+  z-index: 3;
+  opacity: 0;
+  user-select: none;
+}
+
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+  .crown-gold-leaf-text,
+  .crown-invitation-line {
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .crown-gold-leaf-text {
+    background-image:
+      radial-gradient(circle at 22% 28%, rgba(255, 255, 255, 0.62) 0 0.5px, transparent 0.9px),
+      radial-gradient(circle at 72% 68%, rgba(79, 49, 4, 0.38) 0 0.45px, transparent 0.9px),
+      linear-gradient(180deg, #fff6bd 0%, #e8c65f 27%, #fff0a0 45%, #b47d16 72%, #ebc34f 100%);
+    background-size: 8px 8px, 11px 11px, 100% 100%;
+    background-blend-mode: screen, multiply, normal;
+    -webkit-background-clip: text;
+    background-clip: text;
+  }
+
+  .crown-invitation-line {
+    /* Fallbacks (champagne palette) so this class renders on its own — the
+       --prestige-text-* vars are only supplied when paired with a palette class
+       like .champagne-text; without them the gradient would be invalid and the
+       text would clip to transparent (invisible). */
+    background-image: linear-gradient(
+      180deg,
+      var(--prestige-text-highlight, #fff9d6) 0%,
+      var(--prestige-text-face, #f6e6ac) 34%,
+      var(--prestige-text-mid, #e0bd6e) 62%,
+      var(--prestige-text-low, #b1852c) 100%
+    );
+    background-blend-mode: normal;
+    -webkit-background-clip: text;
+    background-clip: text;
+  }
+
+  .royal-crown-inlay-text {
+    color: transparent;
+    background-image:
+      radial-gradient(circle at 18% 26%, rgba(255, 255, 255, 0.52) 0 0.55px, transparent 1px),
+      radial-gradient(circle at 76% 62%, rgba(103, 73, 18, 0.22) 0 0.5px, transparent 1px),
+      repeating-linear-gradient(
+        116deg,
+        rgba(255, 255, 255, 0.16) 0 1px,
+        rgba(177, 132, 31, 0.08) 1px 2px,
+        transparent 2px 6px
+      ),
+      linear-gradient(
+        112deg,
+        var(--crown-pearl) 0%,
+        #f8ecd0 18%,
+        #dce9dc 34%,
+        #fff8e6 49%,
+        var(--crown-champagne) 68%,
+        #fff9e9 84%,
+        #c38f24 100%
+      );
+    background-size: 9px 9px, 13px 13px, 8px 8px, 100% 100%;
+    background-blend-mode: screen, multiply, soft-light, normal;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .royal-crown-inlay-glint {
+    display: block;
+    color: transparent;
+    background-image: linear-gradient(
+      180deg,
+      #ffffff 0%,
+      #fff6c8 48%,
+      #d5eee1 72%,
+      #ffffff 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    clip-path: polygon(-44% -15%, -18% -15%, -34% 115%, -60% 115%);
+    -webkit-text-fill-color: transparent;
+    -webkit-text-stroke: 0;
+    text-shadow: 0 0 0.1em rgba(255, 243, 189, 0.48);
+  }
+}
+
+@supports not (clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%)) {
+  .royal-crown-inlay-glint {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .royal-crown-inlay-glint {
+    display: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .crown-gold-leaf-text,
+  .crown-invitation-line,
+  .royal-crown-inlay-text {
+    color: CanvasText;
+    background: none;
+    -webkit-text-fill-color: CanvasText;
+    -webkit-text-stroke: 0;
+    text-shadow: none;
+  }
+
+  .royal-crown-inlay-underlay,
+  .royal-crown-inlay-gold,
+  .royal-crown-inlay-glint {
+    display: none;
+  }
+}
+
 .wedding-scroll-line {
   background-color: var(--wedding-scroll-line);
   transition: background-color 180ms ease;
+}
+
+/* The agenda illustrations are fine gold linework on a moving dark video.
+   A concentrated gold boost and a narrow dark-gold edge keep them distinct
+   without relying on unpredictable blend modes. */
+.agenda-icon-image {
+  filter:
+    brightness(1.18)
+    contrast(2.15)
+    saturate(1.8)
+    drop-shadow(0 1px 0 rgba(74, 46, 6, 0.9))
+    drop-shadow(0 0 5px rgba(183, 122, 14, 0.82));
+}
+
+.agenda-timeline-node,
+.agenda-timeline-line {
+  background-color: #e8c65f;
+  background-image:
+    radial-gradient(circle at 22% 28%, rgba(255, 255, 255, 0.62) 0 0.5px, transparent 0.9px),
+    radial-gradient(circle at 72% 68%, rgba(79, 49, 4, 0.38) 0 0.45px, transparent 0.9px),
+    linear-gradient(180deg, #fff6bd 0%, #e8c65f 27%, #fff0a0 45%, #b47d16 72%, #ebc34f 100%);
+  background-size: 8px 8px, 11px 11px, 100% 100%;
+  background-blend-mode: screen, multiply, normal;
+  box-shadow: 0 0 0.18rem rgba(255, 222, 124, 0.18);
+}
+
+.agenda-timeline-line {
+  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 8%, #000 92%, transparent);
+  mask-image: linear-gradient(to bottom, transparent, #000 8%, #000 92%, transparent);
+}
+
+.initials-radiance {
+  position: relative;
+  isolation: isolate;
+}
+
+.initials-radiance::before {
+  position: absolute;
+  z-index: -1;
+  inset: -12%;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(255, 250, 218, 0.13) 0%,
+    rgba(232, 187, 60, 0.045) 42%,
+    transparent 74%
+  );
+  content: "";
+  filter: blur(4px);
+  pointer-events: none;
+}
+
+/* Fine-line section ornaments: one self-contained material layer so the
+   invitation's Khmer text surfaces remain completely untouched. */
+.wedding-section-divider {
+  width: min(100%, var(--wedding-divider-length, 28rem));
+  position: relative;
+  aspect-ratio: var(--wedding-divider-aspect-ratio, 400 / 42);
+  color: #efd278;
+  overflow: visible;
+}
+
+.wedding-section-divider__artwork {
+  display: block;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: calc(100% / var(--wedding-divider-scale, 1));
+  height: auto;
+  transform: translate(-50%, -50%) scale(var(--wedding-divider-scale, 1));
+  transform-origin: center;
+  filter: drop-shadow(0 0 4px rgba(255, 222, 124, 0.5));
+}
+
+.wedding-section-divider--radiant .wedding-section-divider__artwork,
+.wedding-section-divider--radiant-lotus .wedding-section-divider__artwork,
+.wedding-section-divider--radiant-rings .wedding-section-divider__artwork,
+.wedding-section-divider--radiant-kbach .wedding-section-divider__artwork,
+.wedding-section-divider--radiant-flame .wedding-section-divider__artwork {
+  filter: drop-shadow(0 0 6px rgba(255, 222, 124, 0.58));
+}
+
+.wedding-section-divider--cursive-bloom .wedding-section-divider__artwork,
+.wedding-section-divider--cursive-ribbon .wedding-section-divider__artwork,
+.wedding-section-divider--cursive-floral .wedding-section-divider__artwork,
+.wedding-section-divider--cursive-crest .wedding-section-divider__artwork {
+  filter: drop-shadow(0 0 5px rgba(255, 222, 124, 0.4));
+}
+
+/* Gold-plaque button: the Cloudinary artwork is the whole visual surface.
+   Its label owns the shared .gold-text material directly, so clipping never
+   affects the button wrapper or plaque artwork. */
+.share-button {
+  aspect-ratio: 1672 / 941;
+  width: min(100%, 20rem);
+}
+
+.share-button__background {
+  pointer-events: none;
 }
 
 /* PhotoMosaic tiles: rounded corners (radius driven by the --mosaic-radius

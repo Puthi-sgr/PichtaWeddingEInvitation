@@ -1,13 +1,5 @@
 import { RefObject, useEffect } from "react";
 import gsap from "gsap";
-import ScrollTrigger from "gsap/ScrollTrigger";
-
-gsap.registerPlugin(ScrollTrigger);
-
-const prefersReducedMotion = () =>
-  typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-const sectionStart = "top 84%";
 
 function animateForegroundHandoff() {
   gsap.fromTo(
@@ -27,15 +19,30 @@ function animateForegroundHandoff() {
 }
 
 function animateInvitationHero() {
+  // Plays on mount rather than via a ScrollTrigger — the hero is always on
+  // screen when the invitation enters, so it doesn't need one, and this keeps
+  // the scroll-scrub video engine as the ONLY ScrollTrigger in the app (no
+  // triggers competing with the scrub for the scroll listener).
+  //
+  // Reveal with opacity + transform only — these composite on the GPU. The
+  // guest name uses background-clip:text + a multi-layer text-shadow, so
+  // animating clip-path/scale over it would force a full repaint of that gold
+  // text every frame (the old, janky path). The glint layer was retired with
+  // the archived Royal Crown Inlay, so it is no longer animated here.
   gsap
-    .timeline({
-      scrollTrigger: {
-        trigger: ".invitation-hero-section",
-        start: "top 88%",
-        once: true,
-      },
-    })
+    .timeline()
     .set(".invitation-hero-section .wedding-animated", { willChange: "opacity, transform" })
+    .fromTo(
+      ".invitation-hero-section .hero-badge",
+      { opacity: 0, y: -12, scale: 0.9 },
+      {
+        opacity: 1,
+        y: 0,
+        scale: 1,
+        duration: 0.55,
+        ease: "power3.out",
+      },
+    )
     .fromTo(
       ".invitation-hero-section .hero-detail",
       { opacity: 0, y: 18 },
@@ -46,256 +53,48 @@ function animateInvitationHero() {
         stagger: 0.14,
         ease: "power3.out",
       },
+      "-=0.18",
     )
     .fromTo(
-      ".invitation-hero-section .guest-letter",
-      {
-        opacity: 0,
-        y: 24,
-        rotation: (index) => (index % 2 === 0 ? -8 : 8),
-        scale: 0.82,
-      },
+      ".invitation-hero-section [data-guest-name-reveal]",
+      { opacity: 0, y: 22 },
       {
         opacity: 1,
         y: 0,
-        rotation: 0,
-        scale: 1,
-        duration: 0.85,
-        stagger: {
-          each: 0.045,
-          from: "center",
-        },
-        ease: "back.out(1.9)",
+        duration: 0.9,
+        ease: "power3.out",
       },
       "-=0.2",
     )
     .set(".invitation-hero-section .wedding-animated", { clearProps: "willChange" });
 }
 
-function animateLineage() {
-  gsap
-    .timeline({
-      scrollTrigger: {
-        trigger: ".lineage-section",
-        start: sectionStart,
-        once: true,
-      },
-    })
-    .set(".lineage-section .wedding-animated", { willChange: "opacity, transform" })
-    .fromTo(
-      ".lineage-card",
-      { opacity: 0, y: 24, scale: 0.98 },
-      {
-        opacity: 1,
-        y: 0,
-        scale: 1,
-        duration: 0.65,
-        stagger: 0.12,
-        ease: "power3.out",
-      },
-    )
-    .fromTo(
-      ".lineage-copy",
-      { opacity: 0, y: 18 },
-      {
-        opacity: 1,
-        y: 0,
-        duration: 0.58,
-        ease: "power3.out",
-      },
-      "-=0.2",
-    )
-    .fromTo(
-      ".couple-names",
-      { opacity: 0, y: 22, scale: 0.96 },
-      {
-        opacity: 1,
-        y: 0,
-        scale: 1,
-        duration: 0.7,
-        ease: "back.out(1.45)",
-      },
-      "-=0.12",
-    )
-    .set(".lineage-section .wedding-animated", { clearProps: "willChange" });
-}
-
-function animateAgenda() {
-  gsap
-    .timeline({
-      scrollTrigger: {
-        trigger: ".agenda-section",
-        start: sectionStart,
-        once: true,
-      },
-    })
-    .set(".agenda-section .wedding-animated", { willChange: "opacity, transform" })
-    .fromTo(
-      ".agenda-heading",
-      { opacity: 0, y: 20 },
-      {
-        opacity: 1,
-        y: 0,
-        duration: 0.62,
-        ease: "power3.out",
-      },
-    )
-    .fromTo(
-      ".agenda-group-title",
-      { opacity: 0, y: 16 },
-      {
-        opacity: 1,
-        y: 0,
-        duration: 0.52,
-        stagger: 0.1,
-        ease: "power3.out",
-      },
-      "-=0.2",
-    )
-    .fromTo(
-      ".agenda-item",
-      { opacity: 0, y: 18 },
-      {
-        opacity: 1,
-        y: 0,
-        duration: 0.5,
-        stagger: 0.075,
-        ease: "power3.out",
-      },
-      "-=0.12",
-    )
-    .set(".agenda-section .wedding-animated", { clearProps: "willChange" });
-}
-
-function animateVenue() {
-  gsap
-    .timeline({
-      scrollTrigger: {
-        trigger: ".venue-section",
-        start: sectionStart,
-        once: true,
-      },
-    })
-    .set(".venue-section .wedding-animated", { willChange: "opacity, transform" })
-    .fromTo(
-      ".venue-kicker, .venue-title",
-      { opacity: 0, y: 20 },
-      {
-        opacity: 1,
-        y: 0,
-        duration: 0.62,
-        stagger: 0.12,
-        ease: "power3.out",
-      },
-    )
-    .fromTo(
-      ".venue-word",
-      { opacity: 0, y: 18, rotation: -2 },
-      {
-        opacity: 1,
-        y: 0,
-        rotation: 0,
-        duration: 0.56,
-        stagger: 0.09,
-        ease: "power3.out",
-      },
-      "-=0.18",
-    )
-    .fromTo(
-      ".venue-map-label, .venue-map-action",
-      { opacity: 0, y: 18, scale: 0.96 },
-      {
-        opacity: 1,
-        y: 0,
-        scale: 1,
-        duration: 0.52,
-        stagger: 0.1,
-        ease: "back.out(1.55)",
-      },
-      "-=0.1",
-    )
-    .set(".venue-section .wedding-animated", { clearProps: "willChange" });
-}
-
-function animateGallery() {
-  gsap
-    .timeline({
-      scrollTrigger: {
-        trigger: ".gallery-section",
-        start: sectionStart,
-        once: true,
-      },
-    })
-    .set(".gallery-section .wedding-animated", { willChange: "opacity, transform" })
-    .fromTo(
-      ".gallery-heading, .gallery-subtitle",
-      { opacity: 0, y: 20 },
-      {
-        opacity: 1,
-        y: 0,
-        duration: 0.58,
-        stagger: 0.12,
-        ease: "power3.out",
-      },
-    )
-    .fromTo(
-      ".gallery-frame",
-      { opacity: 0, y: 24, scale: 0.985 },
-      {
-        opacity: 1,
-        y: 0,
-        scale: 1,
-        duration: 0.78,
-        ease: "power3.out",
-      },
-      "-=0.08",
-    )
-    .fromTo(
-      ".gallery-more",
-      { opacity: 0, y: 16 },
-      {
-        opacity: 1,
-        y: 0,
-        duration: 0.48,
-        ease: "power3.out",
-      },
-      "-=0.1",
-    )
-    .set(".gallery-section .wedding-animated", { clearProps: "willChange" });
-}
-
-function animateFooter() {
-  gsap
-    .timeline({
-      scrollTrigger: {
-        trigger: ".footer-section",
-        start: "top 88%",
-        once: true,
-      },
-    })
-    .set(".footer-section .wedding-animated", { willChange: "opacity, transform" })
-    .fromTo(
-      ".footer-heading, .footer-line, .footer-credit",
-      { opacity: 0, y: 18 },
-      {
-        opacity: 1,
-        y: 0,
-        duration: 0.56,
-        stagger: 0.1,
-        ease: "power3.out",
-      },
-    )
-    .set(".footer-section .wedding-animated", { clearProps: "willChange" });
-}
+// Every below-the-fold section used to fade in on its own ScrollTrigger. Those
+// triggers (and the ScrollTrigger.refresh that built them) competed with the
+// scroll-scrub video engine and made scrubbing glitchy, so only the hero text
+// animates now — the rest of the sections are revealed statically.
+const belowFoldAnimatedSelector = [
+  ".lineage-section .wedding-animated",
+  ".agenda-section .wedding-animated",
+  ".venue-section .wedding-animated",
+  ".gallery-section .wedding-animated",
+  ".footer-section .wedding-animated",
+].join(", ");
 
 export function useWeddingAnimations(containerRef: RefObject<HTMLDivElement | null>, enabled = true) {
   useEffect(() => {
     const root = containerRef.current;
     if (!root || !enabled) return;
 
-    const ctx = gsap.context(() => {
-      if (prefersReducedMotion()) {
-        gsap.set(".invitation-foreground, .wedding-animated", {
+    const motionPreference = window.matchMedia("(prefers-reduced-motion: reduce)");
+    let ctx: gsap.Context | null = null;
+
+    const applyMotionPreference = () => {
+      ctx?.revert();
+      ctx = gsap.context(() => {
+        // Below-the-fold sections carry an initial opacity-0 class; reveal them
+        // immediately since they no longer have their own scroll animation.
+        gsap.set(belowFoldAnimatedSelector, {
           opacity: 1,
           x: 0,
           y: 0,
@@ -303,19 +102,32 @@ export function useWeddingAnimations(containerRef: RefObject<HTMLDivElement | nu
           rotation: 0,
           clearProps: "willChange",
         });
-        return;
-      }
 
-      gsap.set(".invitation-foreground", { willChange: "opacity, transform" });
-      animateForegroundHandoff();
-      animateInvitationHero();
-      animateLineage();
-      animateAgenda();
-      animateVenue();
-      animateGallery();
-      animateFooter();
-    }, root);
+        if (motionPreference.matches) {
+          gsap.set(".invitation-foreground, .invitation-hero-section .wedding-animated", {
+            opacity: 1,
+            x: 0,
+            y: 0,
+            scale: 1,
+            rotation: 0,
+            clearProps: "willChange",
+          });
+          return;
+        }
 
-    return () => ctx.revert();
+        // Above-the-fold work runs now; the hero is on screen immediately.
+        gsap.set(".invitation-foreground", { willChange: "opacity, transform" });
+        animateForegroundHandoff();
+        animateInvitationHero();
+      }, root);
+    };
+
+    applyMotionPreference();
+    motionPreference.addEventListener("change", applyMotionPreference);
+
+    return () => {
+      motionPreference.removeEventListener("change", applyMotionPreference);
+      ctx?.revert();
+    };
   }, [containerRef, enabled]);
 }

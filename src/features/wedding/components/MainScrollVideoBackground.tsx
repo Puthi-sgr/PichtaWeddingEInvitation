@@ -54,6 +54,7 @@ export function MainScrollVideoBackground({
 }: MainScrollVideoBackgroundProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const reverseScrubCoverRef = useRef<HTMLDivElement>(null);
+  const primeStateRef = useRef<"idle" | "done">("idle");
   const [usePosterFallback, setUsePosterFallback] = useState(prefersReducedMotion);
   const [isVideoBuffered, setIsVideoBuffered] = useState(false);
 
@@ -84,6 +85,80 @@ export function MainScrollVideoBackground({
     return () => window.clearTimeout(timeout);
   }, [handleVideoBuffered, usePosterFallback]);
 
+  // Mobile browsers (iOS Safari most notably) will not paint any frame for a
+  // <video> that has only been loaded but never played — so scrubbing its
+  // currentTime shows a black rectangle. The scrub engine only ever pauses and
+  // seeks, so we "unlock" the decoder with a muted play() → pause(). iOS grants
+  // that unlock reliably only inside a real user gesture, so the primary path
+  // is the entry-screen tap ("wedding:entry-tap"); the autoplay attempt is the
+  // fallback that covers desktop and most Android.
+  const primeVideo = useCallback(
+    (reason: string) => {
+      if (primeStateRef.current === "done") return;
+      const video = videoRef.current;
+      if (!video || usePosterFallback) return;
+
+      video.muted = true;
+      video.playsInline = true;
+
+      const playResult = video.play();
+      if (!playResult || typeof playResult.then !== "function") {
+        primeStateRef.current = "done";
+        return;
+      }
+
+      playResult
+        .then(() => {
+          if (primeStateRef.current === "done") return;
+          primeStateRef.current = "done";
+          // Let one frame decode and paint, then hand control to the scrub
+          // engine, which pauses and seeks from here on.
+          requestAnimationFrame(() => {
+            const activeVideo = videoRef.current;
+            if (!activeVideo) return;
+            activeVideo.pause();
+            handleVideoBuffered(`primed:${reason}`);
+          });
+        })
+        .catch(() => {
+          // Blocked (e.g. muted autoplay refused without a gesture). Leaving the
+          // state idle lets a later user gesture retry the unlock; the poster
+          // and reverse cover still render in the meantime.
+          debugEntryLog("mainBackgroundVideo:prime-blocked", () => ({
+            reason,
+            video: getVideoDebugSnapshot(videoRef.current),
+          }));
+        });
+    },
+    [handleVideoBuffered, usePosterFallback],
+  );
+
+  // Primary unlock path: the tap on the entry screen is a real user gesture, so
+  // priming the scrub video within it satisfies iOS Safari's activation rule.
+  useEffect(() => {
+    if (usePosterFallback) return;
+    const onEntryTap = () => primeVideo("entry-tap");
+    window.addEventListener("wedding:entry-tap", onEntryTap);
+    return () => window.removeEventListener("wedding:entry-tap", onEntryTap);
+  }, [primeVideo, usePosterFallback]);
+
+  // Fallback: on platforms that allow muted autoplay (desktop, most Android),
+  // prime as soon as the video has data without needing the tap.
+  useEffect(() => {
+    if (usePosterFallback) return;
+    const video = videoRef.current;
+    if (!video) return;
+
+    const attempt = () => primeVideo("autoplay");
+    if (video.readyState >= 2) {
+      attempt();
+      return;
+    }
+
+    video.addEventListener("loadeddata", attempt, { once: true });
+    return () => video.removeEventListener("loadeddata", attempt);
+  }, [primeVideo, usePosterFallback]);
+
   useScrollScrubVideo({
     videoRef,
     containerRef,
@@ -96,7 +171,7 @@ export function MainScrollVideoBackground({
 
   return (
     <div
-      className={`hero-image wedding-animated pointer-events-none fixed inset-0 z-0 h-[100lvh] min-h-[100dvh] w-screen overflow-hidden bg-stone-950 ${className}`}
+      className={`hero-image wedding-mobile-viewport wedding-animated pointer-events-none fixed inset-0 z-0 h-[100lvh] min-h-[100dvh] w-screen overflow-hidden bg-stone-950 ${className}`}
     >
       <div className="absolute inset-0 overflow-hidden" data-scroll-video-layer="main-scrub">
         {usePosterFallback ? (
@@ -129,18 +204,16 @@ export function MainScrollVideoBackground({
             onCanPlayThrough={() => handleVideoBuffered("canplaythrough")}
             onError={() => handleVideoBuffered("error")}
           >
-            <source media="(max-width: 767px)" {...mobileBackgroundVideo.sourceProps} />
-            <source media="(min-width: 768px)" {...desktopBackgroundVideo.sourceProps} />
+            <source {...mobileBackgroundVideo.sourceProps} />
           </video>
         )}
       </div>
-      <div className="absolute inset-0 bg-black/20" />
+      <div className="absolute inset-0 bg-black/30" />
       <div className="absolute inset-0 bg-gradient-to-b from-black/18 via-black/12 to-black/24" />
       <div
         ref={reverseScrubCoverRef}
-        className={`absolute inset-0 overflow-hidden transition-opacity duration-500 ease-out ${
-          initialReverseCoverVisible ? "opacity-100" : "opacity-0"
-        }`}
+        className={`absolute inset-0 overflow-hidden transition-opacity duration-500 ease-out ${initialReverseCoverVisible ? "opacity-100" : "opacity-0"
+          }`}
         data-scroll-video-layer="reverse-cover"
         aria-hidden="true"
       >

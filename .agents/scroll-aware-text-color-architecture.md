@@ -55,8 +55,9 @@ That means text cannot reliably adapt when the visible background changes.
 The production invitation is Khmer-only and uses `Moul` from Google Fonts. The current visual direction is dark green/gold wedding stationery:
 
 ```txt
-Gold ceremonial text        -> metallic clipped-gradient treatment
-Primary/secondary copy      -> antique cream / raised print treatment
+Ceremonial title            -> hammered-gold leaf (`crown-gold-leaf-text`)
+Invitation line             -> champagne emboss (`champagne-text crown-invitation-line`)
+Guest name                  -> Royal Khmer Crown Inlay layered material
 Normal wrapper text classes -> plain semantic color only
 ```
 
@@ -69,10 +70,33 @@ gold-text             -> reusable gold text effect
 gold-text-soft        -> lighter gold variant
 gold-text-bright      -> brightest gold variant
 gold-text-deep        -> deeper gold variant
-antique-cream-text    -> selected main non-gold dimensional text treatment
+crown-gold-leaf-text  -> production hammered-gold hero title
+crown-invitation-line -> production champagne hero invitation line
+guest-crown-reveal    -> animation wrapper; never owns a clipped text fill
+royal-crown-inlay-underlay -> aria-hidden emerald/bronze relief layer
+royal-crown-inlay-gold     -> aria-hidden 24K-gold rim layer
+royal-crown-inlay-text     -> semantic pearl/guilloche guest-name layer
+royal-crown-inlay-glint    -> aria-hidden one-shot highlight layer
 ```
 
-`antique-cream-text` is the selected main non-gold style for the invite line and guest name. It uses `background-clip: text`, text stroke, and layered shadows to create a raised printed surface. Apply it to the actual text-bearing element or animated letter span, not to a broad wrapper.
+The Crown palette is centralized in `:root`:
+
+```txt
+--crown-pearl     -> nacre face highlight
+--crown-champagne -> warm face midtone / invitation fallback
+--crown-gold      -> raised gold rim
+--crown-bronze    -> relief depth
+--crown-enamel    -> dark green inner keyline
+--crown-shadow    -> proportional cast shadow
+```
+
+`antique-cream-text`, `pearl-emboss-text`, and the other prestige presets remain reusable, but they are no longer the production guest-name treatment. The Crown Inlay face uses a static clipped material gradient; GSAP animates a center-out clip on `[data-guest-name-reveal]` and a separate polygon clip on `[data-crown-glint]`.
+
+### Khmer Shaping Rule
+
+The guest name must remain one uninterrupted text run. Do not use `split("")`, `Array.from()`, `Intl.Segmenter`, or one span per code point. Khmer vowel signs, combining marks, and coeng conjuncts can otherwise detach and render with dotted-circle artifacts.
+
+The semantic `.royal-crown-inlay-text` is the only guest-name copy exposed to assistive technology. The relief, gold, and glint copies repeat the complete name and must remain `aria-hidden="true"`.
 
 ### Wrapper vs Text Element Rule
 
@@ -87,19 +111,20 @@ layout divs that contain animated child spans
 
 Those classes are often used on containers around GSAP-animated children. If the wrapper owns a clipped gradient while the child spans animate opacity/transform, the browser can paint a ghost/empty text surface before the GSAP reveal completes.
 
-Correct pattern:
+Correct production pattern:
 
 ```tsx
-<h1 className="guest-name wedding-animated">
-  <span className="hero-detail wedding-animated antique-cream-text opacity-0">
+<h1 className="guest-name" lang="km">
+  <span className="hero-detail wedding-animated champagne-text crown-invitation-line opacity-0">
     សូមគោរពអញ្ជើញ
   </span>
-  <span>
-    {letters.map((letter) => (
-      <span className="guest-letter wedding-animated antique-cream-text opacity-0">
-        {letter}
-      </span>
-    ))}
+  <span className="guest-crown-reveal wedding-animated opacity-0" data-guest-name-reveal>
+    <span aria-hidden="true" className="royal-crown-inlay-underlay">{guestName}</span>
+    <span aria-hidden="true" className="royal-crown-inlay-gold">{guestName}</span>
+    <span className="royal-crown-inlay-text">{guestName}</span>
+    <span aria-hidden="true" className="royal-crown-inlay-glint" data-crown-glint>
+      {guestName}
+    </span>
   </span>
 </h1>
 ```
@@ -108,11 +133,25 @@ Incorrect pattern:
 
 ```tsx
 <div className="wedding-text-primary antique-cream-text">
-  <span className="guest-letter opacity-0">...</span>
+  {Array.from(guestName).map((codePoint) => (
+    <span className="guest-letter">{codePoint}</span>
+  ))}
 </div>
 ```
 
-Semantic wrapper classes may still provide normal `color` and short color transitions, but dimensional gradient text effects must live on the text elements that animate.
+Semantic wrapper classes may still provide normal `color` and short color transitions. Dimensional fills must live on the actual text layers, while behavior should use `[data-guest-name-reveal]` and `[data-crown-glint]` so styling changes do not break GSAP selectors.
+
+### Local Radial Backdrop Rule
+
+All visible text groups in `InvitationBody` and `EventAgenda` use a local contrast layer when displayed over photography or patterned artwork. The layer must be a separate, empty `.text-radial-backdrop` wrapper with a `::before` radial gradient; the real text element is its positioned foreground child.
+
+```tsx
+<span className="text-radial-backdrop">
+  <span className="hero-detail gold-text">{invitation.invitePrefix}</span>
+</span>
+```
+
+Use `.text-radial-backdrop--block` for centered block-level copy and `.text-radial-backdrop--start` for left-aligned agenda copy. Do not put the radial pseudo-element on the same node that owns a clipped material fill such as `gold-text` or `crown-gold-leaf-text`: it can visually muddy the gold surface. Keep the backdrop subtle, local to its text group, non-interactive, and below the text (`::before` at `z-index: 0`; child at `z-index: 1`).
 
 ## Recommended Model
 
@@ -273,8 +312,14 @@ wedding-text-primary / wedding-text-secondary
 wedding-text-kicker / wedding-text-accent
   -> gold text effect is acceptable because these are normally applied directly to text nodes
 
-antique-cream-text
-  -> selected dimensional style for main invitation text; apply directly to the rendered text/span
+crown-gold-leaf-text / crown-invitation-line
+  -> production hero title surfaces; apply directly to their text nodes
+
+royal-crown-inlay-text
+  -> production semantic guest-name face; keep the complete Khmer name in one text run
+
+guest-crown-reveal
+  -> animation-only wrapper; do not place a clipped text fill on it
 ```
 
 Example section migration:
@@ -351,7 +396,9 @@ Keep the transition short. Long color transitions can look muddy while the rever
 * Prefer CSS variables and a single data attribute.
 * Keep the reverse-cover threshold in `useScrollScrubVideo`; text should follow the same mode as the actual visual background.
 * Keep `background-clip: text` effects off parent wrappers. Use them only on actual text-bearing elements.
-* Do not animate clipped text gradients by default. The current stable production choice is a static gradient surface plus GSAP opacity/transform reveal. If gradient motion is reintroduced, gate it with `prefers-reduced-motion` and verify it does not desynchronize from GSAP opacity on mobile Safari/Chrome.
+* Keep the Crown Inlay face and gold textures static. Production animates a center-out clip on `[data-guest-name-reveal]` and one polygon clip on `[data-crown-glint]`; it does not animate gradient positions or text shadows.
+* The glint must run once, remain `aria-hidden`, clear its temporary `clip-path`, `opacity`, and `will-change`, and be hidden by `prefers-reduced-motion`, unsupported `clip-path`, and forced-colors fallbacks.
+* Base rules must set readable solid colors and `background-image: none`. Assign clipped gradients only inside a positive `@supports` block so unsupported browsers do not paint rectangular gradient boxes behind text.
 
 ## Implementation Steps
 

@@ -9,6 +9,7 @@ const GalleryLabPage = lazy(() => import("../features/gallery/pages/GalleryLabPa
 const ParticlesLabPage = lazy(() => import("../features/particles/pages/ParticlesLabPage"));
 const AnimationLabPage = lazy(() => import("../features/animationLab/pages/AnimationLabPage"));
 const ShowcasePage = lazy(() => import("../features/showcase/pages/ShowcasePage"));
+const DividerLabPage = lazy(() => import("../features/wedding/pages/DividerLabPage"));
 
 export function AppRouter() {
   return (
@@ -21,6 +22,7 @@ export function AppRouter() {
           <Route path="/particles-lab" element={<ParticlesLabPage />} />
           <Route path="/animation-lab" element={<AnimationLabPage />} />
           <Route path="/showcase" element={<ShowcasePage />} />
+          <Route path="/divider-lab" element={<DividerLabPage />} />
           <Route path="*" element={<HomePage />} />
         </Routes>
       </Suspense>

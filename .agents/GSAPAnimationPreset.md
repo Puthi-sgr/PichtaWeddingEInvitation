@@ -10,7 +10,7 @@ The website uses pre-generated static invite pages. The guest name and invitatio
 
 Use GSAP for choreographed reveal effects, not for basic page rendering.
 
-The page must remain readable if JavaScript is delayed or disabled.
+The personalized content must exist in the HTML before animation starts; GSAP must never generate the guest name. The current production markup uses `opacity-0` guards to prevent pre-animation flashing, so reduced-motion and CSS-feature fallbacks are supported, but a complete no-JavaScript fallback would require a separate CSS change.
 
 ```txt
 HTML = content
@@ -42,12 +42,14 @@ continuous scroll-frame text updates.
 ```txt
 Preferred:
   one trigger per major section
-  opacity + transform only
+  opacity + transform for routine entrances
+  one bounded clip-path reveal for the Crown name wrapper and glint
   small stagger inside the section timeline
   temporary will-change, then clear it
 
 Avoid:
   one trigger per letter/row/text node
+  one DOM span per Khmer code point
   scrubbed text timelines
   pinning
   per-frame gradient/text-shadow animation
@@ -62,52 +64,69 @@ The production wedding invite is Khmer-only and uses `Moul` as the visible weddi
 
 ```txt
 CSS:
-  gold clipped-gradient text for ceremonial labels
-  antique cream clipped-gradient / raised print effect for the main invitation line
+  hammered-gold leaf for the ceremonial title
+  champagne embossing for the invitation line
+  static emerald, gold, and pearl/guilloche Crown Inlay layers for the guest name
 
 GSAP:
-  opacity + transform reveal only
-  no ownership of text gradients, strokes, or color surfaces
+  opacity + transform for normal entrances
+  one center-out clip-path reveal on the intact guest-name wrapper
+  one polygon clip-path pass on the aria-hidden glint
+  no ownership of gradients, strokes, shadows, or material colors
 ```
 
-The selected main non-gold text style is `antique-cream-text`. The gold ceremonial style is applied through `wedding-text-kicker`, `wedding-text-accent`, or `gold-text`.
+The production hero classes are:
 
-Critical rule: apply clipped-gradient text effects to the exact text-bearing element that GSAP animates. Do not put `antique-cream-text`, `gold-text`, or any class with `background-clip: text` on a parent wrapper around `.guest-letter`/`.hero-detail` children. Parent-level clipped gradients can paint ghost text before the child opacity reveal completes.
+```txt
+crown-gold-leaf-text          -> ceremonial title surface
+champagne-text + crown-invitation-line -> invitation-line surface
+guest-crown-reveal            -> animation wrapper, selected by [data-guest-name-reveal]
+royal-crown-inlay-underlay    -> aria-hidden emerald/bronze relief copy
+royal-crown-inlay-gold        -> aria-hidden gold-rim copy
+royal-crown-inlay-text        -> only semantic guest-name copy
+royal-crown-inlay-glint       -> aria-hidden highlight copy, selected by [data-crown-glint]
+```
+
+Critical Khmer rule: keep the full guest name as one uninterrupted shaping run. Never use `split("")`, `Array.from()`, `Intl.Segmenter`, or a `.guest-letter` span per code point for production Khmer. Those approaches can detach vowel signs and coeng conjuncts and produce dotted-circle artifacts.
+
+Critical surface rule: clipped-gradient classes belong on the actual text-bearing layers, never on `wedding-text-primary`, `wedding-text-secondary`, `guest-crown-reveal`, or another broad wrapper. Behavior selectors are the data attributes; material classes are styling-only.
 
 Good:
 
 ```jsx
-<span className="hero-detail wedding-animated antique-cream-text opacity-0">
-  សូមគោរពអញ្ជើញ
-</span>
-
-<span className="guest-letter wedding-animated antique-cream-text inline-block opacity-0">
-  ក
+<span className="guest-crown-reveal wedding-animated opacity-0" data-guest-name-reveal>
+  <span aria-hidden="true" className="royal-crown-inlay-underlay">{guestName}</span>
+  <span aria-hidden="true" className="royal-crown-inlay-gold">{guestName}</span>
+  <span className="royal-crown-inlay-text">{guestName}</span>
+  <span aria-hidden="true" className="royal-crown-inlay-glint" data-crown-glint>
+    {guestName}
+  </span>
 </span>
 ```
 
 Avoid:
 
 ```jsx
-<h1 className="guest-name wedding-animated antique-cream-text">
-  <span className="guest-letter wedding-animated opacity-0">ក</span>
-</h1>
+{Array.from(guestName).map((codePoint) => (
+  <span className="guest-letter">{codePoint}</span>
+))}
 ```
 
-Do not animate gradient positions by default. The current stable decision is: static gradient surface, GSAP entrance motion. If a future pass adds moving highlights/shimmer, it must include a `prefers-reduced-motion` guard and be tested against GSAP opacity/transform timing.
+The material gradients and text shadows stay static. The sole production highlight is a one-shot clipped glint; never replace it with a looping shimmer or per-frame gradient-position animation.
 
 ## Locked animation bucket
 
 The approved animation set is:
 
 1. Photo Curtain
-2. Letter Bloom
-3. Venue Wave
-4. Vow Whisper
-5. Golden Sweep
-6. Location Pin
-7. Iris Reveal / Iris Sweep
-8. Ring Lock
+2. Crown Inlay Reveal (production Khmer guest name)
+3. Letter Bloom (lab/Latin or otherwise shaping-safe text only)
+4. Venue Wave
+5. Vow Whisper
+6. Golden Sweep
+7. Location Pin
+8. Iris Reveal / Iris Sweep
+9. Ring Lock
 
 Avoid adding generic fade-up animations unless they support one of the approved effects.
 
@@ -278,19 +297,21 @@ Medium-high overhead. Use once only. Prefer Photo Curtain for safer mobile perfo
 
 ---
 
-# 3. Letter Bloom
+# 3. Letter Bloom (Lab / Shaping-Safe Scripts Only)
 
 ## Purpose
 
-Reveal the invitee name letter by letter, blooming from the center.
+Reveal shaping-safe text letter by letter, blooming from the center.
 
 ## Best use
 
-Personalized guest name.
+Latin text or another script that has been explicitly verified to remain correct when split into independent glyph spans.
+
+**Do not use this preset for Khmer.** The production invitation uses Crown Inlay Reveal because Khmer vowel signs, combining marks, and coeng conjuncts must remain in one shaping run.
 
 ## Required rendering shape
 
-Split the guest name into spans.
+Split only shaping-safe text into spans.
 
 ```jsx
 const guestName = "Chantha Family";
@@ -347,17 +368,64 @@ gsap.fromTo(
 
 Low overhead. Uses transform and opacity. Safe on mobile.
 
-## Production note for Khmer invitee text
+## Production replacement for Khmer: Crown Inlay Reveal
 
-For the current invite, the guest name letters may also carry `antique-cream-text`:
+The current invite renders the full personalized name in every visual layer. Only `.royal-crown-inlay-text` is semantic; the aligned material copies are `aria-hidden`.
 
-```jsx
-<span className="guest-letter wedding-animated antique-cream-text inline-block opacity-0">
-  {letter === " " ? "\u00A0" : letter}
-</span>
+GSAP reveals the wrapper from the center and then moves one diagonal clip across the glint:
+
+```js
+gsap
+  .timeline({
+    scrollTrigger: {
+      trigger: ".invitation-hero-section",
+      start: "top 88%",
+      once: true,
+    },
+  })
+  .fromTo(
+    ".invitation-hero-section [data-guest-name-reveal]",
+    {
+      opacity: 0,
+      y: 14,
+      scale: 0.985,
+      clipPath: "inset(-35% 50% -35% 50%)",
+      willChange: "opacity, transform, clip-path",
+    },
+    {
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      clipPath: "inset(-35% -5% -35% -5%)",
+      duration: 0.95,
+      ease: "power4.out",
+    },
+  )
+  .fromTo(
+    ".invitation-hero-section [data-crown-glint]",
+    {
+      opacity: 0,
+      clipPath: "polygon(-44% -15%, -18% -15%, -34% 115%, -60% 115%)",
+    },
+    {
+      opacity: 0.9,
+      clipPath: "polygon(160% -15%, 186% -15%, 170% 115%, 144% 115%)",
+      duration: 1.05,
+      ease: "power2.inOut",
+    },
+  )
+  .to(".invitation-hero-section [data-crown-glint]", {
+    opacity: 0,
+    duration: 0.2,
+    ease: "power2.out",
+  });
 ```
 
-Keep the gradient/stroke style on each `.guest-letter`, because `.guest-letter` is the element whose opacity and transform GSAP owns. Do not move the style up to `.guest-name`.
+After the sequence, clear temporary `clipPath`, `transform`, `opacity`, and `willChange` properties as implemented in `useWeddingAnimations.ts`. The wrapper retains its final inline `opacity: 1` because its initial `opacity-0` utility prevents pre-animation flashing.
+
+## Performance note
+
+Low-medium overhead. The name uses one reveal target and one glint target, never one animation target per glyph. Both clip-path animations run once and all material gradients and text shadows remain static.
 
 ---
 
@@ -757,7 +825,7 @@ Recommended flow:
 ```txt
 Hero section:
 - Photo Curtain OR Iris Reveal
-- Letter Bloom
+- Crown Inlay Reveal + one glint
 - Ring Lock
 
 Message section:
@@ -786,16 +854,17 @@ Do not run both on the same image during initial load.
 
 # Performance matrix
 
-| Animation     |    Overhead | Main cost                                | Mobile verdict               |
-| ------------- | ----------: | ---------------------------------------- | ---------------------------- |
-| Letter Bloom  |         Low | Text spans + transform/opacity           | Safe                         |
-| Venue Wave    |         Low | Word spans + transform/opacity           | Safe                         |
-| Location Pin  |         Low | Icon transform + card scale              | Safe                         |
-| Ring Lock     |  Low-medium | Small shape transforms + sparkle stagger | Safe                         |
-| Golden Sweep  |      Medium | Moving overlay + blur                    | Use once                     |
-| Photo Curtain |      Medium | `clip-path: inset(...)`                  | Use once                     |
-| Iris Reveal   | Medium-high | `clip-path: circle(...)`                 | Use instead of Photo Curtain |
-| Vow Whisper   | Medium-high | Word stagger + blur                      | Reduce blur on mobile        |
+| Animation          |    Overhead | Main cost                                | Mobile verdict                        |
+| ------------------ | ----------: | ---------------------------------------- | ------------------------------------- |
+| Crown Inlay Reveal |  Low-medium | Two one-shot clip paths on intact runs   | Production Khmer path; use once       |
+| Letter Bloom       |         Low | Text spans + transform/opacity           | Shaping-safe scripts only; never Khmer |
+| Venue Wave         |         Low | Word spans + transform/opacity           | Safe                                  |
+| Location Pin       |         Low | Icon transform + card scale              | Safe                                  |
+| Ring Lock          |  Low-medium | Small shape transforms + sparkle stagger | Safe                                  |
+| Golden Sweep       |      Medium | Moving overlay + blur                    | Use once                              |
+| Photo Curtain      |      Medium | `clip-path: inset(...)`                  | Use once                              |
+| Iris Reveal        | Medium-high | `clip-path: circle(...)`                 | Use instead of Photo Curtain          |
+| Vow Whisper        | Medium-high | Word stagger + blur                      | Reduce blur on mobile                 |
 
 ---
 
@@ -843,44 +912,74 @@ Safe:
   static background-clip text on short labels or headline spans
   text-shadow layers on main invitation text
   GSAP opacity/transform on the same text-bearing element
+  one center-out clip on the intact Crown wrapper and one clip on its glint
 
 Avoid:
   background-clip text on section/layout wrappers
   animated gradient-position on many letters
+  any per-code-point DOM or animation treatment for Khmer
   filter/blur on long Khmer text
   transition: all
 ```
 
 If text reveal looks like a ghost/empty fill before the animation completes, check for `background-clip: text` or `color: transparent` on an ancestor wrapper first.
 
+For feature fallbacks, keep readable solid colors and `background-image: none` outside `@supports`. Add clipped material gradients only inside positive `background-clip: text` support checks, hide the glint when polygon `clip-path` is unsupported, and collapse all material layers to `CanvasText` in forced-colors mode.
+
 ---
 
 # Reduced motion support
 
-Respect user motion preferences.
+Respect user motion preferences at initial load and when the OS/browser setting changes while the invitation is mounted. Production uses a `MediaQueryList` change listener and rebuilds the root-scoped GSAP context so active motion is reverted cleanly.
 
 ```js
-const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const motionPreference = window.matchMedia("(prefers-reduced-motion: reduce)");
+let ctx = null;
 
-if (reduceMotion) {
-  gsap.set(".animated", {
-    opacity: 1,
-    y: 0,
-    x: 0,
-    scale: 1,
-    rotation: 0,
-    clearProps: "filter,clipPath",
-  });
-  ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
+const applyMotionPreference = () => {
+  ctx?.revert();
+  ctx = gsap.context(() => {
+    if (motionPreference.matches) {
+      gsap.set(".invitation-foreground, .wedding-animated", {
+        opacity: 1,
+        x: 0,
+        y: 0,
+        scale: 1,
+        rotation: 0,
+        clearProps: "willChange",
+      });
+      gsap.set("[data-guest-name-reveal]", { clipPath: "none" });
+      gsap.set("[data-crown-glint]", {
+        opacity: 0,
+        clearProps: "clipPath,willChange",
+      });
+      return;
+    }
+
+    // Build the normal one-shot section timelines here.
+  }, root);
+};
+
+applyMotionPreference();
+motionPreference.addEventListener("change", applyMotionPreference);
+
+return () => {
+  motionPreference.removeEventListener("change", applyMotionPreference);
+  ctx?.revert();
+};
+```
+
+CSS independently suppresses the decorative highlight:
+
+```css
+@media (prefers-reduced-motion: reduce) {
+  .royal-crown-inlay-glint {
+    display: none;
+  }
 }
 ```
 
-Use this class approach:
-
-```html
-<div class="hero-image animated">...</div>
-<span class="guest-letter animated">C</span>
-```
+Do not kill every global `ScrollTrigger`; revert only the context owned by `useWeddingAnimations`.
 
 ---
 
@@ -933,6 +1032,7 @@ Testing:
 * Check if content is visible before animation starts.
 * Check if layout does not jump when animations trigger.
 * Check if the page still works with reduced motion.
+* Toggle reduced motion while the invitation is mounted; the active context must revert, the name must become fully visible, and the glint must disappear.
 
 ---
 
@@ -943,7 +1043,7 @@ Use this production combination:
 ```txt
 Hero:
 - Photo Curtain OR Iris Reveal
-- Letter Bloom
+- Crown Inlay Reveal + one glint
 - Ring Lock
 
 Message:

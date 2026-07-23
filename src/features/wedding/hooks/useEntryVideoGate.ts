@@ -215,6 +215,14 @@ export function useEntryVideoGate({
       video: getVideoDebugSnapshot(videoRef.current),
     }));
 
+    // Unlock the main scroll-scrub video within this same user gesture. iOS
+    // Safari only grants a <video> the frame-rendering rights needed for
+    // currentTime scrubbing from inside a real tap — MainScrollVideoBackground
+    // listens for this and primes its video synchronously.
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new Event("wedding:entry-tap"));
+    }
+
     if (playOnInteraction && !hasPlaybackStarted) {
       void tryPlay();
       return;

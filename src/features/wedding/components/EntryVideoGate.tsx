@@ -71,7 +71,7 @@ export function EntryVideoGate({
       {...entryGate.gateProps}
       data-entry-video-gate
       tabIndex={isExiting ? -1 : 0}
-      className={`fixed inset-0 z-[9999] h-[100lvh] min-h-[100dvh] w-screen overflow-hidden bg-black ${
+      className={`wedding-mobile-viewport fixed inset-0 z-[9999] h-[100lvh] min-h-[100dvh] w-screen overflow-hidden bg-black ${
         isExiting ? "pointer-events-none opacity-0" : "opacity-100"
       }`}
       style={{

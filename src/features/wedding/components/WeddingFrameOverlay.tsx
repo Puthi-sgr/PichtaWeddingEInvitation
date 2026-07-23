@@ -44,7 +44,7 @@ export function WeddingFrameOverlay() {
 
   return (
     <div
-      className="pointer-events-none fixed inset-0 z-[80] h-[100lvh] min-h-[100dvh] w-screen overflow-hidden will-change-transform [transform:translateZ(0)]"
+      className="wedding-mobile-viewport pointer-events-none fixed inset-0 z-[80] h-[100lvh] min-h-[100dvh] w-screen overflow-hidden will-change-transform [transform:translateZ(0)]"
       aria-hidden="true"
     >
       <img

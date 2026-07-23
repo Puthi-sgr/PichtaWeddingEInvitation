@@ -43,7 +43,7 @@ export function useWeddingExperienceOrchestrator({
   hasEntryVideo = true,
   persistEntryDismissal = false,
   entryStorageKey = defaultEntryStorageKey,
-  entryExitDurationMs = 3500,
+  entryExitDurationMs = 350,
   invitationEntranceDelayMs = 50,
   criticalLoadDelayMs = 0,
   idlePreloadDelayMs = 700,

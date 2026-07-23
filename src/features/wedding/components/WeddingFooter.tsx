@@ -13,7 +13,7 @@ export function WeddingFooter() {
       </h2>
       <div className="wedding-text-secondary space-y-3 text-xl leading-[2] md:text-3xl">
         <p className="footer-line wedding-animated opacity-0">{footer.gratitudeLineOne}</p>
-        <p className="footer-line wedding-animated opacity-0">{footer.gratitudeLineTwo}</p>
+        <p className="footer-line wedding-animated crown-gold-leaf-text opacity-0">{footer.gratitudeLineTwo}</p>
       </div>
       <p className="footer-credit wedding-animated wedding-text-accent mt-12 text-xl leading-[1.8] opacity-0 md:text-2xl">
         {footer.credit}

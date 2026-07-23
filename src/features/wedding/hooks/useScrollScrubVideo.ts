@@ -7,12 +7,18 @@ import { WeddingScrollVisualMode } from "../types";
 gsap.registerPlugin(ScrollTrigger);
 ScrollTrigger.config({ ignoreMobileResize: true });
 
-const forwardScrubEase = 0.5;
-const backwardScrubEase = 0.5;
+// Higher = the displayed frame converges to the scroll position in fewer
+// frames (less trailing). Async video seeks already provide the visual
+// smoothing, so we keep only a light lerp on top rather than the old 0.5 that
+// closed just half the gap per frame.
+const forwardScrubEase = 0.82;
+const backwardScrubEase = 0.82;
 const forwardVideoSeekDeltaSeconds = 0.01;
 const backwardVideoSeekDeltaSeconds = 0.01;
 const forwardSeekCooldownMs = 0;
-const backwardSeekCooldownMs = 100;
+// The one-seek-in-flight guard (isSeeking) is the real throttle now that the
+// asset seeks cheaply, so the extra backward cooldown just added latency.
+const backwardSeekCooldownMs = 0;
 const reverseCoverScrollThresholdPx = 40;
 const temporarilyEnableReverseScrub = false;
 
@@ -190,7 +196,6 @@ export function useScrollScrubVideo({
       }
 
       video.pause();
-      video.currentTime = 0;
       targetTime = 0;
       easedTime = 0;
       lastCommittedTime = 0;
@@ -235,6 +240,17 @@ export function useScrollScrubVideo({
           lastScrollY = currentScrollY;
         },
       });
+
+      // Seed the scrub position from wherever the user has already scrolled to.
+      // Without this the video snaps to frame 0 the instant it finishes
+      // buffering, then visibly chases the scroll position back to correct —
+      // the startup lag you'd see when the video buffers after a fast scroll.
+      const seededTime = trigger ? clampTime(trigger.progress * video.duration) : 0;
+      targetTime = seededTime;
+      easedTime = seededTime;
+      lastCommittedTime = seededTime;
+      video.currentTime = seededTime;
+      updateEngineDebugState();
 
       gsap.ticker.remove(updateVideoTime);
       gsap.ticker.add(updateVideoTime);

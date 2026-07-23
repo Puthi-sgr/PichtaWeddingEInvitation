@@ -1,4 +1,5 @@
 import { weddingContent } from "../content/weddingContent";
+import { ShareButton } from "./ShareButton";
 
 export function VenueMap() {
   const venue = weddingContent.venue;
@@ -17,19 +18,20 @@ export function VenueMap() {
         </h2>
         <div className="wedding-text-secondary space-y-4 text-2xl leading-[2] md:text-4xl">
           <p className="venue-word wedding-animated opacity-0">{venue.name}</p>
-          <p className="venue-word wedding-animated opacity-0">{venue.building}</p>
+          <p className="venue-word wedding-animated crown-gold-leaf-text opacity-0">{venue.building}</p>
         </div>
         <p className="venue-map-label wedding-animated wedding-text-kicker mt-12 text-xl leading-[1.8] opacity-0 md:text-2xl">
           {venue.mapLabel}
         </p>
-        <a
+        <ShareButton
           href={venue.mapUrl}
           target="_blank"
           rel="noreferrer"
-          className="venue-map-action wedding-animated mt-6 inline-flex min-h-12 items-center justify-center border border-current px-7 py-3 text-xl leading-[1.6] opacity-0 transition-opacity hover:opacity-75 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4"
+          className="venue-map-action wedding-animated mt-6 opacity-0 transition-opacity hover:opacity-75 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4"
+          labelClassName="text-xl"
         >
           {venue.mapButton}
-        </a>
+        </ShareButton>
       </div>
     </section>
   );

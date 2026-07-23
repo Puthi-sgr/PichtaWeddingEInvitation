@@ -1,11 +1,9 @@
 import { useEffect, useRef } from "react";
 import { frameImage } from "../components/WeddingFrameOverlay";
-import { desktopBackgroundVideo, mobileBackgroundVideo, reverseScrollCoverImage } from "../components/MainScrollVideoBackground";
+import { mobileBackgroundVideo, reverseScrollCoverImage } from "../components/MainScrollVideoBackground";
 import { debugEntryLog } from "../utils/entryDebug";
 
 const imageStageSafetyTimeoutMs = 1500;
-const mobileBreakpointQuery = "(max-width: 767px)";
-
 function preloadImage(url: string) {
   return new Promise<void>((resolve) => {
     if (!url) {
@@ -47,12 +45,9 @@ export function useCriticalAssetPreload({ enabled }: UseCriticalAssetPreloadPara
     Promise.race([imagesReady, safetyTimeout]).then(() => {
       if (cancelled) return;
 
-      const isMobileViewport =
-        typeof window !== "undefined" && window.matchMedia(mobileBreakpointQuery).matches;
-      const targetVideo = isMobileViewport ? mobileBackgroundVideo : desktopBackgroundVideo;
+      const targetVideo = mobileBackgroundVideo;
 
       debugEntryLog("criticalAssetPreload:stageB-start", () => ({
-        isMobileViewport,
         videoUrl: targetVideo.url,
       }));
 

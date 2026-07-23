@@ -363,35 +363,45 @@ continuous blur/filter animations
 
 ## Animation integration note
 
-The content must exist before animation starts.
+The personalized content must exist before the GSAP timeline starts. For Khmer, `displayName` must remain one uninterrupted shaping run; animate the wrapper, never the code points.
 
 Correct:
 
-```html
-<h2 class="guest-name">Chantha Family</h2>
+```tsx
+<span className="guest-crown-reveal wedding-animated opacity-0" data-guest-name-reveal>
+  <span aria-hidden="true" className="royal-crown-inlay-underlay">{guest.displayName}</span>
+  <span aria-hidden="true" className="royal-crown-inlay-gold">{guest.displayName}</span>
+  <span className="royal-crown-inlay-text">{guest.displayName}</span>
+  <span aria-hidden="true" className="royal-crown-inlay-glint" data-crown-glint>
+    {guest.displayName}
+  </span>
+</span>
 ```
 
-Then GSAP enhances it.
+Only `.royal-crown-inlay-text` is semantic. Every decorative copy contains the complete name and is `aria-hidden`.
 
 Incorrect:
 
-```txt
-GSAP/JavaScript is required before the guest name becomes visible.
+```tsx
+{Array.from(guest.displayName).map((codePoint) => (
+  <span className="guest-letter">{codePoint}</span>
+))}
 ```
 
-Use animation only as progressive enhancement.
+Do not use `split("")`, `Array.from()`, `Intl.Segmenter`, or per-code-point spans for Khmer. The current `opacity-0` pre-animation guards provide reduced-motion and feature fallbacks through `useWeddingAnimations`, but they are not a complete no-JavaScript fallback.
 
 ---
 
 ## Locked animation list
 
-Use the separate `animation.md` spec for full animation details.
+Use `.agents/GSAPAnimationPreset.md` for the full animation and Crown Inlay details.
 
 Locked approved animation bucket:
 
 ```txt
 Photo Curtain
-Letter Bloom
+Crown Inlay Reveal (production Khmer guest name)
+Letter Bloom (lab/Latin or shaping-safe scripts only)
 Venue Wave
 Vow Whisper
 Golden Sweep
@@ -467,10 +477,12 @@ Before final delivery, verify:
 - Each guest slug generates a page.
 - Each page displays the correct guest name.
 - Unknown slugs are not generated or return a fallback page.
-- The guest name is visible in the HTML before JavaScript animation.
+- The guest name exists as one semantic `.royal-crown-inlay-text` run before the GSAP timeline starts.
+- Representative Khmer names render without detached marks, broken conjuncts, or dotted-circle artifacts.
 - The page works on mobile width.
 - Cloudinary images are responsive and not too large.
 - GSAP animations do not block content.
+- Toggling reduced motion while the invite is mounted reveals static content, suppresses the glint, and cleans up the previous animation context.
 - ScrollTrigger animations use `once: true`.
 - No full guest list is exposed to the browser by default.
 - No sensitive guest information is included in static pages.

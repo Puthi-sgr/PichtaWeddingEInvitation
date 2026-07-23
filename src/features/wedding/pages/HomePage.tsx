@@ -1,6 +1,7 @@
 import { Suspense, lazy, useCallback, useRef, useState } from "react";
 import { EventAgenda } from "../components/EventAgenda";
 import { InvitationBody } from "../components/InvitationBody";
+import { InvitationEnglishSummary } from "../components/InvitationEnglishSummary";
 import { MainScrollVideoBackground } from "../components/MainScrollVideoBackground";
 import { PhotoGallery } from "../components/PhotoGallery";
 import { VenueMap } from "../components/VenueMap";
@@ -8,6 +9,7 @@ import { WeddingFooter } from "../components/WeddingFooter";
 import { DebugSection } from "../components/DebugSection";
 import { ScrollVideoDebugPanel } from "../components/ScrollVideoDebugPanel";
 import { EntryVideoGate } from "../components/EntryVideoGate";
+import { DesktopInvitationSideScenery } from "../components/DesktopInvitationSideScenery";
 import { WeddingFrameOverlay } from "../components/WeddingFrameOverlay";
 import { useWeddingAnimations } from "../hooks/useWeddingAnimations";
 import { useWeddingExperienceOrchestrator } from "../hooks/useWeddingExperienceOrchestrator";
@@ -40,7 +42,21 @@ export default function HomePage() {
   useCriticalAssetPreload({ enabled: hasEntryBuffered || !experience.showEntryVideo });
 
   return (
-    <div ref={containerRef} className="relative w-full overflow-x-hidden bg-stone-950 font-sans text-stone-800">
+    <div ref={containerRef} className="wedding-experience-stage relative min-h-[100svh] w-full overflow-x-hidden bg-stone-950 font-sans text-stone-800">
+      <DesktopInvitationSideScenery />
+
+      {/* Mounted from the start (behind the entry gate) so its <video> element
+          exists during the entry tap and can be unlocked for iOS scrubbing —
+          the unlock only sticks to the element that received the gesture. The
+          scrub engine itself stays disabled until the invitation is shown, so
+          its ScrollTrigger is still created against the full page height. */}
+      <MainScrollVideoBackground
+        containerRef={containerRef}
+        enabled={experience.showInvitation}
+        initialReverseCoverVisible
+        onVisualModeChange={handleVisualModeChange}
+      />
+
       {experience.showEntryVideo && (
         <EntryVideoGate
           isExiting={experience.isEntryExiting}
@@ -53,26 +69,24 @@ export default function HomePage() {
 
       {experience.showInvitation && (
         <>
-          <MainScrollVideoBackground
-            containerRef={containerRef}
-            initialReverseCoverVisible
-            onVisualModeChange={handleVisualModeChange}
-          />
-          <Suspense fallback={null}>
+          {/* <Suspense fallback={null}>
             <GoldenBackdrop
               particleRecipe="gildedDust"
               hazePosition="top left"
-              positionClassName="fixed inset-0 z-[5]"
+              positionClassName="wedding-mobile-viewport fixed inset-0 z-[5]"
             />
-          </Suspense>
+          </Suspense> */}
           <ScrollVideoDebugPanel />
           <div
-            className="invitation-foreground wedding-copy-theme relative z-10 opacity-0"
+            className="wedding-mobile-canvas invitation-foreground wedding-copy-theme relative z-10 mx-auto w-full opacity-0"
             data-scroll-visual-mode={scrollVisualMode}
           >
             <div className="relative z-10">
               <DebugSection name="សេចក្តីអញ្ជើញ">
                 <InvitationBody guest={guest} />
+              </DebugSection>
+              <DebugSection name="English invitation">
+                <InvitationEnglishSummary />
               </DebugSection>
               <DebugSection name="របៀបវារៈ">
                 <EventAgenda />

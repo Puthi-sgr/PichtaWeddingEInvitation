@@ -175,11 +175,11 @@ Owns the GSAP ScrollTrigger seek engine for the main background video. It initia
 
 `useScrollScrubVideo` is called with `enabled: enabled && isVideoBuffered && !usePosterFallback` (the `enabled` prop itself defaults to `true` and is only a manual override — the real timing gate is `isVideoBuffered`). `preload` on the `<video>` is always `"auto"`.
 
-This means `ScrollTrigger` can now be created as early as `entryExiting` if the video buffers that fast — potentially on the same frames as the fading entry gate or the letter/hero-detail GSAP entrance. This is a deliberate trade-off: it prioritizes "start scrubbing the instant it's safe to download-wise" over the old fixed-delay approach, at the cost of the CPU/GPU-contention-avoidance the phase-based gate used to guarantee on weak mobile devices. If jank appears here in testing, prefer adding a small explicit delay inside `MainScrollVideoBackground`'s buffered-check rather than reintroducing a phase dependency.
+This means `ScrollTrigger` can now be created as early as `entryExiting` if the video buffers that fast — potentially on the same frames as the fading entry gate, hero-detail entrance, or intact Crown guest-name reveal/glint. This is a deliberate trade-off: it prioritizes "start scrubbing the instant it's safe to download-wise" over the old fixed-delay approach, at the cost of the CPU/GPU-contention-avoidance the phase-based gate used to guarantee on weak mobile devices. If jank appears here in testing, prefer adding a small explicit delay inside `MainScrollVideoBackground`'s buffered-check rather than reintroducing a phase dependency.
 
 ### `useWeddingAnimations`
 
-Owns the invitation foreground entrance and section/hero animations. It should only run when `enableSectionAnimations` is true. The foreground entrance intentionally starts during `entryExiting` to avoid a post-gate text buffer. It must stay compositor-friendly: opacity and transform only; no blur/filter, layout-property animation, or `transition: all`.
+Owns the invitation foreground entrance and section/hero animations. It should only run when `enableSectionAnimations` is true. The foreground entrance intentionally starts during `entryExiting` to avoid a post-gate text buffer. Routine entrances stay on opacity and transform. The bounded production exception is one center-out `clip-path` on `[data-guest-name-reveal]` and one polygon `clip-path` on `[data-crown-glint]`; both run once and clear temporary properties. Do not add blur/filter, layout-property animation, `transition: all`, or per-glyph clips.
 
 Current production structure:
 
@@ -188,7 +188,9 @@ Current production structure:
 * The hook may be split internally into small preset helper functions, but those helpers should create only section-level one-shot launchers.
 * Use `ScrollTrigger` as an intersection launcher with `once: true`; do not create scrubbed text timelines.
 * Keep one trigger per major section where practical. Do not create one trigger per letter, row, or text node.
-* Section animations should use opacity and transform only, and clear temporary `will-change` after the timeline.
+* Keep the Khmer guest name as one shaping run. The semantic `.royal-crown-inlay-text` and all `aria-hidden` Crown copies contain the complete name; do not restore `.guest-letter` spans.
+* Section animations should normally use opacity and transform. The Crown reveal clears temporary `clipPath`, `transform`, and `willChange`; the glint also clears its inline `opacity`. Keep the wrapper's final inline `opacity: 1` because its `opacity-0` utility is the pre-animation flash guard.
+* Reduced-motion handling is reactive: `useWeddingAnimations` listens to its `MediaQueryList`, reverts the current root-scoped GSAP context, applies visible static states and hides the glint, then rebuilds normal timelines if motion becomes allowed again. Remove the listener and revert the context on cleanup.
 * The existing scroll scrub tracker remains dedicated to background video seeking, reverse cover state, and coarse visual mode reporting.
 
 ### `WeddingFrameOverlay`
@@ -208,6 +210,7 @@ The frame overlay intentionally uses `will-change-transform` and `translateZ(0)`
 * Keep the static reverse cover hidden on initial forward entry; show it only when reverse/up scroll activates it.
 * Do not release the entry video media source until the entry gate has faded out or unmounted.
 * If a separate transition overlay is introduced later, keep it separate from video cleanup and document it here.
+* Never fragment a Khmer `displayName` for animation. Preserve `[data-guest-name-reveal]`, `[data-crown-glint]`, the intact semantic text run, and the reactive motion-preference cleanup.
 * Always keep entry video source cleanup in `useEntryVideoGate`.
 * Keep the decorative frame overlay separate from the scrub video background so it can cover text/content without affecting GSAP scroll progress.
 * Preserve the frame overlay compositor hints unless testing proves they are no longer needed on mobile browsers.
