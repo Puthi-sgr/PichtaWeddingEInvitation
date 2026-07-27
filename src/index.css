@@ -76,6 +76,17 @@ body {
   }
 
   .wedding-mobile-canvas {
+    /* Frame-safe content boundary. The WeddingFrameOverlay is a fixed decorative
+       border above the content; these keep every section clear of it so letters
+       are never clipped. --safe-x is the left/right clearance applied uniformly to
+       every section (the single knob for side clipping); --safe-y is the top/bottom
+       clearance for the first/last content. TUNE these to your frame image. */
+    --wedding-frame-safe-x: 2.75rem;
+    --wedding-frame-safe-y: 7rem;
+    /* Body "letters" size — anchored to the invitation line ("សូមគោរពអញ្ជើញ",
+       ~2rem). All readable copy is routed through this so it stays uniform; nudge
+       this ONE number to resize every body tier together. Headings stay larger. */
+    --wedding-copy-size: 1.75rem;
     width: min(100%, 26.25rem);
     min-height: 100svh;
     box-shadow:
@@ -94,21 +105,21 @@ body {
      inside this narrow canvas. Keep every invitation section at the values a
      420px phone receives. */
   .wedding-mobile-canvas .invitation-hero-section {
-    padding: 7rem 2.25rem;
+    padding: var(--wedding-frame-safe-y) var(--wedding-frame-safe-x);
   }
 
   .wedding-mobile-canvas .guest-name {
-    font-size: 2.25rem;
+    font-size: 2.5rem;
   }
 
   .wedding-mobile-canvas .hero-detail {
-    font-size: 1.875rem;
+    font-size: 2rem;
   }
 
   .wedding-mobile-canvas .lineage-section,
   .wedding-mobile-canvas .venue-section,
   .wedding-mobile-canvas .gallery-section {
-    padding: 7rem 1.25rem;
+    padding: 7rem var(--wedding-frame-safe-x);
   }
 
   .wedding-mobile-canvas .lineage-badge {
@@ -117,17 +128,17 @@ body {
   }
 
   .wedding-mobile-canvas .lineage-kicker {
-    font-size: 1.5rem;
+    font-size: var(--wedding-copy-size);
   }
 
   .wedding-mobile-canvas .lineage-section > div > .grid {
     gap: 0.75rem;
-    font-size: 0.875rem;
+    font-size: var(--wedding-copy-size);
     line-height: 1.75;
   }
 
   .wedding-mobile-canvas .lineage-copy {
-    font-size: 0.875rem;
+    font-size: var(--wedding-copy-size);
     line-height: 1.9;
   }
 
@@ -138,20 +149,20 @@ body {
 
   .wedding-mobile-canvas .couple-names > div {
     gap: 0.5rem;
-    font-size: 1.25rem;
+    font-size: var(--wedding-copy-size);
     line-height: 1.6;
   }
 
   .wedding-mobile-canvas .couple-names .wedding-text-accent {
-    font-size: 1rem;
+    font-size: calc(var(--wedding-copy-size) * 0.85);
   }
 
   .wedding-mobile-canvas .agenda-section {
-    padding: 6rem 1.25rem;
+    padding: 6rem var(--wedding-frame-safe-x);
   }
 
   .wedding-mobile-canvas .agenda-kicker {
-    font-size: 1.125rem;
+    font-size: var(--wedding-copy-size);
   }
 
   .wedding-mobile-canvas .agenda-heading {
@@ -159,7 +170,7 @@ body {
   }
 
   .wedding-mobile-canvas .agenda-note {
-    font-size: 1rem;
+    font-size: var(--wedding-copy-size);
   }
 
   .wedding-mobile-canvas .agenda-timeline {
@@ -177,19 +188,19 @@ body {
   }
 
   .wedding-mobile-canvas .agenda-time {
-    font-size: 1.125rem;
+    font-size: var(--wedding-copy-size);
   }
 
   .wedding-mobile-canvas .agenda-label {
-    font-size: 1rem;
+    font-size: var(--wedding-copy-size);
   }
 
   .wedding-mobile-canvas .agenda-item .agenda-label + p {
-    font-size: 0.75rem;
+    font-size: calc(var(--wedding-copy-size) * 0.85);
   }
 
   .wedding-mobile-canvas .venue-kicker {
-    font-size: 1.5rem;
+    font-size: var(--wedding-copy-size);
   }
 
   .wedding-mobile-canvas .venue-title,
@@ -199,17 +210,17 @@ body {
 
   .wedding-mobile-canvas .venue-section .wedding-text-secondary,
   .wedding-mobile-canvas .gallery-subtitle {
-    font-size: 1.5rem;
+    font-size: var(--wedding-copy-size);
   }
 
   .wedding-mobile-canvas .venue-map-label,
   .wedding-mobile-canvas .gallery-more,
   .wedding-mobile-canvas .footer-credit {
-    font-size: 1.25rem;
+    font-size: calc(var(--wedding-copy-size) * 0.9);
   }
 
   .wedding-mobile-canvas .footer-section {
-    padding: 6rem 1.25rem;
+    padding: var(--wedding-frame-safe-y) var(--wedding-frame-safe-x);
   }
 
   .wedding-mobile-canvas .footer-heading {
@@ -217,7 +228,7 @@ body {
   }
 
   .wedding-mobile-canvas .footer-section .wedding-text-secondary {
-    font-size: 1.25rem;
+    font-size: var(--wedding-copy-size);
   }
 }
 

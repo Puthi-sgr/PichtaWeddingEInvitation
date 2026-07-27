@@ -21,12 +21,16 @@ export function PhotoGallery() {
       className="gallery-section wedding-section wedding-text-primary mx-auto min-h-[100svh] w-full max-w-6xl px-5 py-28 text-center md:px-8 md:py-36"
     >
       <div className="mx-auto max-w-3xl">
-        <h2 className="gallery-heading wedding-animated mb-5 text-4xl leading-[1.75] opacity-0 md:text-6xl">
-          {gallery.title}
-        </h2>
-        <p className="gallery-subtitle wedding-animated wedding-text-secondary text-2xl leading-[1.8] opacity-0 md:text-3xl">
-          {gallery.subtitle}
-        </p>
+        <div className="text-radial-backdrop text-radial-backdrop--block mb-5">
+          <h2 className="gallery-heading wedding-animated text-4xl leading-[1.75] opacity-0 md:text-6xl">
+            {gallery.title}
+          </h2>
+        </div>
+        <div className="text-radial-backdrop text-radial-backdrop--block">
+          <p className="gallery-subtitle wedding-animated wedding-text-secondary text-2xl leading-[1.8] opacity-0 md:text-3xl">
+            {gallery.subtitle}
+          </p>
+        </div>
       </div>
 
       <div className="gallery-frame wedding-animated opacity-0">
@@ -39,9 +43,11 @@ export function PhotoGallery() {
         </Suspense>
       </div>
 
-      <p className="gallery-more wedding-animated wedding-text-kicker mt-10 text-xl leading-[1.8] opacity-0 md:text-2xl">
-        {gallery.moreLabel}
-      </p>
+      <div className="text-radial-backdrop text-radial-backdrop--block mt-10">
+        <p className="gallery-more wedding-animated wedding-text-kicker text-xl leading-[1.8] opacity-0 md:text-2xl">
+          {gallery.moreLabel}
+        </p>
+      </div>
     </section>
   );
 }

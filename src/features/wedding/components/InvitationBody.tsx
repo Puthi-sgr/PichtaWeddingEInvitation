@@ -140,21 +140,27 @@ export function InvitationBody({ guest }: InvitationBodyProps) {
               <div className="text-radial-backdrop text-radial-backdrop--block">
                 <dt className="gold-text">{eventSummary.dateLabel}</dt>
               </div>
-              <dd className="crown-gold-leaf-text mt-1">{eventSummary.date}</dd>
+              <div className="text-radial-backdrop text-radial-backdrop--block mt-1">
+                <dd className="crown-gold-leaf-text">{eventSummary.date}</dd>
+              </div>
               <WeddingSectionDivider className="mx-auto mt-4" preset="tapered-rule" length="8rem" />
             </div>
             <div>
               <div className="text-radial-backdrop text-radial-backdrop--block">
                 <dt className="gold-text">{eventSummary.timeLabel}</dt>
               </div>
-              <dd className="crown-gold-leaf-text mt-1">{eventSummary.time}</dd>
+              <div className="text-radial-backdrop text-radial-backdrop--block mt-1">
+                <dd className="crown-gold-leaf-text">{eventSummary.time}</dd>
+              </div>
               <WeddingSectionDivider className="mx-auto mt-4" preset="tapered-rule" length="8rem" />
             </div>
             <div>
               <div className="text-radial-backdrop text-radial-backdrop--block">
                 <dt className="gold-text">{eventSummary.locationLabel}</dt>
               </div>
-              <dd className="crown-gold-leaf-text mt-1">{eventSummary.location}</dd>
+              <div className="text-radial-backdrop text-radial-backdrop--block mt-1">
+                <dd className="crown-gold-leaf-text">{eventSummary.location}</dd>
+              </div>
               <ShareButton
                 href={eventSummary.mapUrl}
                 target="_blank"

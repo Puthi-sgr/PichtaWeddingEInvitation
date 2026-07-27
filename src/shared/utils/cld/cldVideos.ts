@@ -14,7 +14,7 @@ export const cldVideos = {
   //   fallbackUrl: "https://example.com/fallback-video.mp4",
   // },
   "wedding.hero-main": {
-    publicId: "PreFinalizeScrub_scrub_960_crf32_g8_kjtyfj",
+    publicId: "StillMain_webLoop_900p30_crf27_g30_ia18wt",
     title: "Wedding background video",
     fallbackUrl:
       "https://assets.mixkit.co/videos/preview/mixkit-romantic-couple-on-the-beach-during-a-beautiful-sunset-5231-large.mp4",

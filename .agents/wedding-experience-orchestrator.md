@@ -12,12 +12,16 @@ Relevant files:
 src/features/wedding/components/WeddingFrameOverlay.tsx
 src/features/wedding/hooks/useWeddingExperienceOrchestrator.ts
 src/features/wedding/hooks/useEntryVideoGate.ts
-src/features/wedding/hooks/useScrollScrubVideo.ts
+src/features/wedding/hooks/useReverseCoverMode.ts
 src/features/wedding/hooks/useWeddingAnimations.ts
 src/features/wedding/hooks/useCriticalAssetPreload.ts
 ```
 
-For scroll-direction-aware text readability and color theming over the forward scrub video vs reverse scroll cover, read:
+> The main background video autoplays and loops; it is no longer scroll-scrubbed.
+> The removed `useScrollScrubVideo` seek engine and its iOS decoder-priming
+> workaround are archived in `.agents/scrub-engine-archive.md`.
+
+For scroll-direction-aware text readability and color theming over the forward looping video vs reverse scroll cover, read:
 
 ```txt
 .agents/scroll-aware-text-color-architecture.md
@@ -56,11 +60,11 @@ type WeddingLoadPhase =
 
 ### `entry`
 
-Only `EntryVideoGate` should be active. The main scroll video, section animations, and heavy decorative assets should not run.
+Only `EntryVideoGate` should be visible. `useReverseCoverMode`, section animations, and heavy decorative assets should not run. The background `<video>` is mounted from page start and may autoplay muted behind the opaque gate — that is intentional (warm start), not scrub activity.
 
 ### `entryExiting`
 
-`EntryVideoGate` remains mounted with the final video frame and fades out. The invitation mounts underneath. Foreground/text GSAP animation may start here so content is already arriving when the gate disappears, but the main scroll video scrub engine must stay disabled.
+`EntryVideoGate` remains mounted with the final video frame and fades out. The invitation mounts underneath. Foreground/text GSAP animation may start here so content is already arriving when the gate disappears, but `useReverseCoverMode` stays disabled (it is gated by `showInvitation`).
 
 ### `criticalLoading`
 
@@ -68,11 +72,11 @@ The invitation is mounted. Critical first-view assets can load. The orchestrator
 
 ### `invitationEntering`
 
-The invitation foreground entrance animation runs. The main scroll video scrub engine is **not** gated by this phase — see "Scroll video scrub engine gating" below. It may already be active here if the video finished downloading quickly (e.g. thanks to `useCriticalAssetPreload` warming the cache during `entry`).
+The invitation foreground entrance animation runs. The background video already autoplays independently of this phase (see "Background video gating" below); `useReverseCoverMode` becomes active once `showInvitation` is true.
 
 ### `invitationReady`
 
-The invitation is visible and interactive. Section animations may run (scroll video is gated independently — see below).
+The invitation is visible and interactive. Section animations may run (the background video and `useReverseCoverMode` are gated independently — see below).
 
 ### `idlePreload`
 
@@ -161,21 +165,21 @@ Warms the browser cache for the frame overlay image, the reverse-scroll cover im
 
 This hook only prefetches bytes into cache. It does not mount `MainScrollVideoBackground`/`WeddingFrameOverlay`, does not touch `enableScrollVideo`/`enableSectionAnimations`, and does not initialize `ScrollTrigger`. All of that still happens exactly per the phase rules above — the goal is only that by the time those phases ask for the real assets, they are already cached. Reuse the exact Cloudinary asset consts exported from `MainScrollVideoBackground.tsx`/`WeddingFrameOverlay.tsx` (`mobileBackgroundVideo`, `desktopBackgroundVideo`, `reverseScrollCoverImage`, `frameImage`) rather than recomputing URLs, so the prefetch URL and the real render URL are byte-identical and the browser cache actually hits.
 
-### `useScrollScrubVideo`
+### `useReverseCoverMode`
 
-Owns the GSAP ScrollTrigger seek engine for the main background video. It initializes when its `enabled` param is true and the video has finite metadata.
+Owns the reverse-scroll cover image and the `WeddingScrollVisualMode` text-color contract. It watches `window.scrollY` direction only — no video seeking, no `ScrollTrigger`, no `gsap.ticker`. Scrolling up past a small threshold latches the reverse cover on; scrolling down clears it. See `.agents/scroll-aware-text-color-architecture.md` for how the reported mode drives text colors.
 
-### Scroll video scrub engine gating
+### Background video gating
 
-`ScrollTrigger` creation is **not** gated by `WeddingLoadPhase` at all (there is no `enableScrollVideo` on the orchestrator). Instead, `MainScrollVideoBackground` tracks its own `isVideoBuffered` state locally:
+The main background `<video>` is `autoPlay muted loop playsInline preload="auto"`. It is **not** gated by `WeddingLoadPhase`: it is mounted from page start (behind the entry gate) and autoplays as soon as it can. Muted inline autoplay is allowed on modern iOS/Android without a gesture, so no decoder-priming step is needed — the old cold-decoder "black rectangle" bug only affected the removed scrub engine, which seeked a *paused* video.
 
-* Set on the real `<video>`'s `canplaythrough` event, or immediately if `readyState >= 4` when the mount effect runs (common case: `useCriticalAssetPreload` already warmed this exact URL into cache during `entry`).
-* Fail-open on the video's `error` event too — `useScrollScrubVideo`'s existing duration-validity check in `createScrubTrigger()` already calls the fallback path for a broken video, so this just lets that run instead of hanging.
-* Fail-open on a ~4s safety timeout if `canplaythrough` never fires (stalled connection).
+`useReverseCoverMode` is called with `enabled: enabled && !usePosterFallback` (the `enabled` prop is `experience.showInvitation`). If autoplay is refused (Low Power Mode, some in-app webviews) or the video errors, the `<video>`'s `onError` routes to `handleFallback`, which sets `usePosterFallback` and reports `"posterFallback"`; the poster image then renders in place of the video. Reduced motion initializes `usePosterFallback` to `true` from the start.
 
-`useScrollScrubVideo` is called with `enabled: enabled && isVideoBuffered && !usePosterFallback` (the `enabled` prop itself defaults to `true` and is only a manual override — the real timing gate is `isVideoBuffered`). `preload` on the `<video>` is always `"auto"`.
+### Crossfade loop (`useCrossfadeVideoLoop`)
 
-This means `ScrollTrigger` can now be created as early as `entryExiting` if the video buffers that fast — potentially on the same frames as the fading entry gate, hero-detail entrance, or intact Crown guest-name reveal/glint. This is a deliberate trade-off: it prioritizes "start scrubbing the instant it's safe to download-wise" over the old fixed-delay approach, at the cost of the CPU/GPU-contention-avoidance the phase-based gate used to guarantee on weak mobile devices. If jank appears here in testing, prefer adding a small explicit delay inside `MainScrollVideoBackground`'s buffered-check rather than reintroducing a phase dependency.
+The current loop asset has **no baked-in crossfade**, so the smooth loop is produced in the DOM. `MainScrollVideoBackground` renders **two stacked `<video>` copies** of the same clip; `useCrossfadeVideoLoop` alternates them: while one plays to its end, the other starts from frame 0 and their opacity cross-dissolves (a CSS `opacity` transition of `videoCrossfadeSeconds`). Each copy's hard loop-snap therefore happens while it is invisible, so only the smooth dissolve is ever seen. It reads `duration` at runtime (no hardcoded timecodes), warms both decoders up front to avoid a cold first handoff, and at steady state only one copy plays — both play only during the crossfade window. Neither copy uses the native `loop` attribute; the hook owns the restart. Tune the dissolve length via `videoCrossfadeSeconds` in `MainScrollVideoBackground.tsx`.
+
+> If you switch back to an asset that already has a baked crossfade, this DOM crossfade is redundant — prefer a single `<video loop>` trimmed so its end frame equals its start (Cloudinary `eo_`/`du_`), or the earlier `currentTime`-wrap approach (see git history for `useSeamlessVideoLoop`).
 
 ### `useWeddingAnimations`
 
@@ -191,7 +195,7 @@ Current production structure:
 * Keep the Khmer guest name as one shaping run. The semantic `.royal-crown-inlay-text` and all `aria-hidden` Crown copies contain the complete name; do not restore `.guest-letter` spans.
 * Section animations should normally use opacity and transform. The Crown reveal clears temporary `clipPath`, `transform`, and `willChange`; the glint also clears its inline `opacity`. Keep the wrapper's final inline `opacity: 1` because its `opacity-0` utility is the pre-animation flash guard.
 * Reduced-motion handling is reactive: `useWeddingAnimations` listens to its `MediaQueryList`, reverts the current root-scoped GSAP context, applies visible static states and hides the glint, then rebuilds normal timelines if motion becomes allowed again. Remove the listener and revert the context on cleanup.
-* The existing scroll scrub tracker remains dedicated to background video seeking, reverse cover state, and coarse visual mode reporting.
+* `useReverseCoverMode` is dedicated to reverse cover state and visual mode reporting only; there is no background video seeking anymore (the video loops).
 
 ### `WeddingFrameOverlay`
 
@@ -203,16 +207,16 @@ The frame overlay intentionally uses `will-change-transform` and `translateZ(0)`
 
 ## Rules For Future Agents
 
-* Do not mount main scroll video during `entry`; it may mount behind the gate during `entryExiting` but must remain disabled.
+* The background video component is mounted from page start (behind the gate) so its `<video>` is warm; it autoplays muted and loops. Keep `useReverseCoverMode` disabled until `showInvitation`.
 * Do not run foreground/section GSAP animations during `entry` or `criticalLoading`. They may run during `entryExiting` behind the fading gate.
 * When `criticalLoadDelayMs` is `0`, skip the visible `criticalLoading` phase transition and go straight from `entryExiting` to `invitationEntering`; do not toggle section animations off between those phases.
-* Do not gate the main scroll video scrub engine by `WeddingLoadPhase`. Its only gate is `MainScrollVideoBackground`'s own `isVideoBuffered` state (see "Scroll video scrub engine gating" above) — it may legitimately become active during `entryExiting`/`invitationEntering` if the video buffers fast.
+* Do not scroll-scrub the background video or reintroduce a video seek engine unless explicitly asked; the video loops. If you do, first read `.agents/scrub-engine-archive.md` for the removed implementation and its iOS decoder-priming requirement.
 * Keep the static reverse cover hidden on initial forward entry; show it only when reverse/up scroll activates it.
 * Do not release the entry video media source until the entry gate has faded out or unmounted.
 * If a separate transition overlay is introduced later, keep it separate from video cleanup and document it here.
 * Never fragment a Khmer `displayName` for animation. Preserve `[data-guest-name-reveal]`, `[data-crown-glint]`, the intact semantic text run, and the reactive motion-preference cleanup.
 * Always keep entry video source cleanup in `useEntryVideoGate`.
-* Keep the decorative frame overlay separate from the scrub video background so it can cover text/content without affecting GSAP scroll progress.
+* Keep the decorative frame overlay separate from the background video layer so it can cover text/content without affecting GSAP scroll progress.
 * Preserve the frame overlay compositor hints unless testing proves they are no longer needed on mobile browsers.
 * Do not reintroduce the content mask approach unless specifically requested; it did not solve the Telegram toolbar leak reliably.
 * Keep asset *prefetching* (`useCriticalAssetPreload`) separate from asset *mounting/enabling* (phase-driven flags above). Prefetching may start earlier than a phase would otherwise allow (e.g. while still in `entry`), as long as it only warms the cache via detached elements and never mounts the real component or initializes `ScrollTrigger` ahead of its phase.

@@ -5,11 +5,20 @@
 The wedding page now has two different background schemes:
 
 ```txt
-forward scroll/down    -> main scrub video visible
+forward scroll/down    -> main looping video visible
 reverse scroll/up      -> reverse scroll cover image visible
 initial post-entry     -> reverse scroll cover image visible first
 fallback/reduced motion -> static poster/image state
 ```
+
+> **Update (2026-07-25):** the main background video now autoplays and loops; it is
+> no longer scroll-scrubbed. The `WeddingScrollVisualMode` values below are emitted
+> by `useReverseCoverMode` (a scroll-direction watcher), not the removed
+> `useScrollScrubVideo` seek engine — archived in `.agents/scrub-engine-archive.md`.
+> The four mode strings, the `data-scroll-visual-mode` wiring, and the CSS variable
+> contract are unchanged, so wherever this doc says `useScrollScrubVideo` below,
+> read `useReverseCoverMode`; `"forwardScrub"` now means "the looping video is the
+> visible background."
 
 Because these backgrounds can have different brightness and contrast, text colors should not be hard-coded per section forever. Text needs a stable visual-state contract so it can adapt when the active background mode changes.
 
@@ -20,7 +29,7 @@ Relevant files:
 ```txt
 src/features/wedding/pages/HomePage.tsx
 src/features/wedding/components/MainScrollVideoBackground.tsx
-src/features/wedding/hooks/useScrollScrubVideo.ts
+src/features/wedding/hooks/useReverseCoverMode.ts
 src/features/wedding/components/InvitationBody.tsx
 src/features/wedding/components/EventAgenda.tsx
 src/features/wedding/components/VenueMap.tsx
